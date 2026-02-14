@@ -1,4 +1,5 @@
-# 📊 Sistema Contable (Boliviano)
+# 📊 Sistema Contable Cuentas
+
 
 Sistema integral de contabilidad, nóminas y facturación electrónica para empresas bolivianas.
 
