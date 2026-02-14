@@ -1,0 +1,116 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+          </svg>
+        </div>
+        <div class="header-info">
+          <h1>Sistema Contable</h1>
+          @if (user()) {
+            <p>{{ user()!.empresa.nombre }}</p>
+          }
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <div class="user-menu">
+          @if (user()) {
+            <div class="user-avatar">
+              {{ user()!.nombres.charAt(0) }}{{ user()!.apellidos.charAt(0) }}
+            </div>
+            <div class="user-info">
+              <p class="user-name">{{ user()!.nombres }} {{ user()!.apellidos }}</p>
+              <p class="user-role">{{ user()!.cargo || user()!.rol }}</p>
+            </div>
+          }
+          <button class="btn-logout" (click)="logout()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+            </svg>
+            Salir
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="dashboard-main">
+    <div class="welcome-section">
+      @if (user()) {
+        <h2>¡Bienvenido, {{ user()!.nombres }}!</h2>
+      }
+      <p>Aquí tienes un resumen de los módulos disponibles</p>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="cards-grid">
+      @for (card of cards(); track card.title) {
+        <div 
+          class="dashboard-card"
+          [style.--card-color]="card.color"
+          (click)="navigateTo(card.route)"
+        >
+          <div class="card-icon">
+            <span class="material-icons">{{ card.icon }}</span>
+          </div>
+          <div class="card-content">
+            <h3>{{ card.title }}</h3>
+            <p>{{ card.value }}</p>
+          </div>
+          <div class="card-arrow">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+            </svg>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(37, 99, 235, 0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#2563EB">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">Tipos de Cambio</p>
+          <p class="stat-value">Bs 6.96 / $us 1</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(124, 58, 237, 0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#7C3AED">
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">Salario Mínimo</p>
+          <p class="stat-value">Bs 2,750</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#10B981">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-4H8v-2h4V7h2v4h4v2h-4v4z"/>
+          </svg>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">SIAT Integrado</p>
+          <p class="stat-value">Activo</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Material Icons Font -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
