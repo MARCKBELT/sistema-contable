@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -8,9 +9,10 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ============================================
-// MIDDLEWARES DE SEGURIDAD
-// ============================================
+/**
+ * MIDDLEWARES DE SEGURIDAD
+ * Propósito: Proteger la aplicación con headers de seguridad y CORS
+ */
 app.use(helmet());
 app.use(cors({
   origin: ['http://localhost:4200', 'http://localhost:3000'],
@@ -19,25 +21,24 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Logging
-app.use(morgan('combined'));
-
-// ============================================
-// IMPORTANTE: NO usar body-parser antes del proxy
-// El proxy necesita recibir el raw stream
-// ============================================
-
-// Rate limiting
+/**
+ * RATE LIMITING
+ * Propósito: Limitar el número de peticiones por IP para evitar abusos
+ */
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // 100 peticiones por ventana
   message: 'Demasiadas solicitudes desde esta IP, intente nuevamente más tarde.'
 });
 app.use('/api/', limiter);
 
-// ============================================
-// HEALTH CHECK
-// ============================================
+// Logging de peticiones
+app.use(morgan('combined'));
+
+/**
+ * HEALTH CHECK
+ * Propósito: Verificar que el gateway esté funcionando
+ */
 app.get('/health', (req, res) => {
   res.json({
     service: 'api-gateway',
@@ -47,53 +48,79 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ============================================
-// CONFIGURACIÓN DE PROXY
-// ============================================
-const createProxy = (target) => {
-  return createProxyMiddleware({
-    target,
-    changeOrigin: true,
-    timeout: 30000,
-    proxyTimeout: 30000,
-    logLevel: 'info',
-    // CRÍTICO: Preservar el body original
-    parseReqBody: false,
-    onError: (err, req, res) => {
-      console.error('❌ Proxy error:', err.message);
-      res.status(503).json({ 
-        error: 'Servicio no disponible',
-        message: 'Por favor, intente nuevamente más tarde.'
-      });
-    },
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(`📤 Proxy: ${req.method} ${req.path} -> ${target}`);
-    },
-    onProxyRes: (proxyRes, req, res) => {
-      console.log(`📥 Response: ${proxyRes.statusCode} from ${req.path}`);
-    }
-  });
+/**
+ * CONFIGURACIÓN DE PROXY
+ * Propósito: Opciones comunes para todos los proxies
+ */
+const proxyOptions = {
+  changeOrigin: true,
+  timeout: 30000,
+  proxyTimeout: 30000,
+  logLevel: 'info',
+  onError: (err, req, res) => {
+    console.error('❌ Proxy error:', err.message);
+    res.status(503).json({ 
+      error: 'Servicio no disponible',
+      message: 'Por favor, intente nuevamente más tarde.'
+    });
+  },
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`📤 Proxy: ${req.method} ${req.path} -> ${proxyReq.path}`);
+  },
+  onProxyRes: (proxyRes, req, res) => {
+    console.log(`📥 Response: ${proxyRes.statusCode} from ${req.path}`);
+  }
 };
 
-// ============================================
-// RUTAS DE PROXY
-// ============================================
+/**
+ * PROXY: Auth Service
+ * Propósito: Manejar autenticación (login, registro, perfil)
+ */
+app.use('/api/auth', createProxyMiddleware({
+  target: process.env.AUTH_SERVICE_URL || 'http://auth-service:3001',
+  ...proxyOptions
+}));
 
-// Auth Service
-app.use('/api/auth', createProxy(process.env.AUTH_SERVICE_URL || 'http://auth-service:3001'));
+/**
+ * PROXY: Config Service (en Contabilidad)
+ * Propósito: Manejar parámetros del sistema (salario mínimo, tipos de cambio, etc.)
+ */
+app.use('/api/config', createProxyMiddleware({
+  target: process.env.CONTABILIDAD_SERVICE_URL || 'http://contabilidad-service:3002',
+  ...proxyOptions
+}));
 
-// Contabilidad Service  
-app.use('/api/contabilidad', createProxy(process.env.CONTABILIDAD_SERVICE_URL || 'http://contabilidad-service:3002'));
+/**
+ * PROXY: Contabilidad Service
+ * Propósito: Manejar contabilidad (plan de cuentas, comprobantes, etc.)
+ */
+app.use('/api/contabilidad', createProxyMiddleware({
+  target: process.env.CONTABILIDAD_SERVICE_URL || 'http://contabilidad-service:3002',
+  ...proxyOptions
+}));
 
-// Nóminas Service
-app.use('/api/nominas', createProxy(process.env.NOMINAS_SERVICE_URL || 'http://nominas-service:3003'));
+/**
+ * PROXY: Nóminas Service
+ * Propósito: Manejar nóminas (empleados, planillas, etc.)
+ */
+app.use('/api/nominas', createProxyMiddleware({
+  target: process.env.NOMINAS_SERVICE_URL || 'http://nominas-service:3003',
+  ...proxyOptions
+}));
 
-// Facturación Service
-app.use('/api/facturacion', createProxy(process.env.FACTURACION_SERVICE_URL || 'http://facturacion-service:3004'));
+/**
+ * PROXY: Facturación Service
+ * Propósito: Manejar facturación (clientes, productos, facturas, SIAT)
+ */
+app.use('/api/facturacion', createProxyMiddleware({
+  target: process.env.FACTURACION_SERVICE_URL || 'http://facturacion-service:3004',
+  ...proxyOptions
+}));
 
-// ============================================
-// MANEJO DE ERRORES 404
-// ============================================
+/**
+ * MANEJO DE ERRORES 404
+ * Propósito: Responder cuando una ruta no existe
+ */
 app.use((req, res) => {
   res.status(404).json({
     error: 'Ruta no encontrada',
@@ -101,9 +128,10 @@ app.use((req, res) => {
   });
 });
 
-// ============================================
-// MANEJO DE ERRORES GLOBAL
-// ============================================
+/**
+ * MANEJO DE ERRORES GLOBAL
+ * Propósito: Capturar cualquier error no manejado
+ */
 app.use((err, req, res, next) => {
   console.error('❌ Error:', err);
   res.status(500).json({
@@ -112,13 +140,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ============================================
-// INICIAR SERVIDOR
-// ============================================
+/**
+ * INICIAR SERVIDOR
+ */
 app.listen(PORT, () => {
   console.log('🚪 API Gateway corriendo en puerto', PORT);
   console.log('📍 Ambiente:', process.env.NODE_ENV || 'development');
-  console.log('🔗 Auth Service:', process.env.AUTH_SERVICE_URL || 'http://auth-service:3001');
+  console.log('🔗 Auth:', process.env.AUTH_SERVICE_URL || 'http://auth-service:3001');
   console.log('🔗 Contabilidad:', process.env.CONTABILIDAD_SERVICE_URL || 'http://contabilidad-service:3002');
   console.log('🔗 Nóminas:', process.env.NOMINAS_SERVICE_URL || 'http://nominas-service:3003');
   console.log('🔗 Facturación:', process.env.FACTURACION_SERVICE_URL || 'http://facturacion-service:3004');

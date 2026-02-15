@@ -1,215 +1,347 @@
+/**
+ * ESTILOS: Dashboard Component
+ * 
+ * Propósito: Diseño moderno y responsive del dashboard principal
+ * Paleta: Fresh & Moderna (azules, púrpuras, verdes, naranjas)
+ */
+
+/* ==========================================
+   CONTENEDOR PRINCIPAL
+   ========================================== */
 .dashboard-container {
   min-height: 100vh;
-  background: #F9FAFB;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 0;
 }
 
+/* ==========================================
+   HEADER
+   ========================================== */
 .dashboard-header {
   background: white;
-  border-bottom: 1px solid #E5E7EB;
-  padding: 1rem 2rem;
-  
-  .header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    
-    .logo {
-      width: 48px;
-      height: 48px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      border-radius: 0.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      
-      svg {
-        width: 28px;
-        height: 28px;
-        color: white;
-      }
-    }
-    
-    .header-info {
-      h1 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #1F2937;
-        margin: 0;
-      }
-      
-      p {
-        font-size: 0.875rem;
-        color: #6B7280;
-        margin: 0.25rem 0 0;
-      }
-    }
-  }
-  
-  .header-right {
-    .user-menu {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      
-      .user-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 0.875rem;
-      }
-      
-      .user-info {
-        .user-name {
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: #1F2937;
-          margin: 0;
-        }
-        
-        .user-role {
-          font-size: 0.75rem;
-          color: #6B7280;
-          margin: 0.25rem 0 0;
-        }
-      }
-      
-      .btn-logout {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        background: #FEF2F2;
-        color: #DC2626;
-        border: 1px solid #FECACA;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        font-size: 0.875rem;
-        font-weight: 600;
-        transition: all 0.2s;
-        
-        svg {
-          width: 18px;
-          height: 18px;
-        }
-        
-        &:hover {
-          background: #FEE2E2;
-        }
-      }
-    }
-  }
-}
-
-.dashboard-main {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.welcome-section {
-  margin-bottom: 2rem;
-  
-  h2 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #1F2937;
-    margin: 0 0 0.5rem;
-  }
-  
-  p {
-    font-size: 1rem;
-    color: #6B7280;
-    margin: 0;
-  }
-}
-
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
 }
 
-.dashboard-card {
-  background: white;
-  border-radius: 1rem;
-  padding: 1.5rem;
+.header-left {
   display: flex;
   align-items: center;
   gap: 1rem;
-  cursor: pointer;
-  transition: all 0.3s;
-  border: 2px solid transparent;
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
   
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-    border-color: var(--card-color);
-  }
-  
-  .card-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 0.75rem;
-    background: var(--card-color);
+  .material-icons {
     color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    
-    .material-icons {
-      font-size: 28px;
-    }
-  }
-  
-  .card-content {
-    flex: 1;
-    
-    h3 {
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: #1F2937;
-      margin: 0 0 0.25rem;
-    }
-    
-    p {
-      font-size: 0.875rem;
-      color: #6B7280;
-      margin: 0;
-    }
-  }
-  
-  .card-arrow {
-    svg {
-      width: 24px;
-      height: 24px;
-      color: #9CA3AF;
-      transition: transform 0.3s;
-    }
-  }
-  
-  &:hover .card-arrow svg {
-    transform: translateX(4px);
-    color: var(--card-color);
+    font-size: 28px;
   }
 }
 
-.quick-stats {
+.company-info {
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+  
+  p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9rem;
+    color: #718096;
+  }
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-avatar {
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.user-info {
+  .user-name {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2d3748;
+  }
+  
+  .user-role {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.85rem;
+    color: #718096;
+    text-transform: capitalize;
+  }
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  color: #718096;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #f7fafc;
+    color: #e53e3e;
+    border-color: #fc8181;
+  }
+  
+  .material-icons {
+    font-size: 18px;
+  }
+}
+
+/* ==========================================
+   SECCIÓN DE BIENVENIDA
+   ========================================== */
+.welcome-section {
+  padding: 0 2rem;
+  margin-bottom: 2rem;
+  
+  h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 1rem;
+    color: #718096;
+  }
+}
+
+/* ==========================================
+   GRID DE TARJETAS DE MÓDULOS
+   EFECTO: Relleno de color + Borde del color del módulo
+   ========================================== */
+.cards-grid {
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+/**
+ * TARJETA DE MÓDULO
+ * Efecto: Relleno del color + Borde del mismo color al hover
+ */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  
+  /**
+   * Pseudo-elemento para el efecto de relleno
+   */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    transition: width 0.4s ease;
+    z-index: 0;
+    border-radius: 12px;
+  }
+  
+  /**
+   * Estado hover base
+   */
+  &:hover {
+    transform: translateY(-4px);
+    
+    &::before {
+      width: 100%;
+    }
+  }
+  
+  /**
+   * Contenido sobre el relleno
+   */
+  .card-icon,
+  .card-content,
+  .card-arrow {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/**
+ * COLORES ESPECÍFICOS POR MÓDULO
+ * Cada módulo tiene: fondo de relleno + borde + sombra del mismo color
+ */
+
+// Contabilidad - Azul #2563EB
+.card[style*="#2563EB"],
+.card[style*="rgb(37, 99, 235)"] {
+  &::before {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(37, 99, 235, 0.08) 100%);
+  }
+  
+  &:hover {
+    border: 2px solid #2563EB; // Borde azul
+    box-shadow: 
+      0 8px 24px rgba(37, 99, 235, 0.25),
+      0 0 30px rgba(37, 99, 235, 0.3);
+  }
+}
+
+// Nóminas - Púrpura #7C3AED
+.card[style*="#7C3AED"],
+.card[style*="rgb(124, 58, 237)"] {
+  &::before {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(124, 58, 237, 0.08) 100%);
+  }
+  
+  &:hover {
+    border: 2px solid #7C3AED; // Borde púrpura
+    box-shadow: 
+      0 8px 24px rgba(124, 58, 237, 0.25),
+      0 0 30px rgba(124, 58, 237, 0.3);
+  }
+}
+
+// Facturación - Verde #10B981
+.card[style*="#10B981"],
+.card[style*="rgb(16, 185, 129)"] {
+  &::before {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%);
+  }
+  
+  &:hover {
+    border: 2px solid #10B981; // Borde verde
+    box-shadow: 
+      0 8px 24px rgba(16, 185, 129, 0.25),
+      0 0 30px rgba(16, 185, 129, 0.3);
+  }
+}
+
+// Reportes - Naranja #F59E0B
+.card[style*="#F59E0B"],
+.card[style*="rgb(245, 158, 11)"] {
+  &::before {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.08) 100%);
+  }
+  
+  &:hover {
+    border: 2px solid #F59E0B; // Borde naranja
+    box-shadow: 
+      0 8px 24px rgba(245, 158, 11, 0.25),
+      0 0 30px rgba(245, 158, 11, 0.3);
+  }
+}
+
+.card-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  .material-icons {
+    color: white;
+    font-size: 24px;
+  }
+}
+
+.card-content {
+  flex: 1;
+  
+  h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #718096;
+  }
+}
+
+.card-arrow {
+  .material-icons {
+    color: #cbd5e0;
+    font-size: 20px;
+    transition: all 0.3s;
+  }
+}
+
+.card:hover .card-arrow .material-icons {
+  color: #4a5568;
+  transform: translateX(4px);
+}
+
+/* ==========================================
+   SECCIÓN DE ESTADÍSTICAS
+   ========================================== */
+.stats-section {
+  padding: 0 2rem 2rem 2rem;
+  
+  h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+  }
+}
+
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
@@ -217,59 +349,103 @@
 
 .stat-card {
   background: white;
-  border-radius: 1rem;
+  border-radius: 12px;
   padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   gap: 1rem;
+  transition: all 0.3s;
   
-  .stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    svg {
-      width: 24px;
-      height: 24px;
-    }
-  }
-  
-  .stat-info {
-    .stat-label {
-      font-size: 0.875rem;
-      color: #6B7280;
-      margin: 0 0 0.25rem;
-    }
-    
-    .stat-value {
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: #1F2937;
-      margin: 0;
-    }
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
 }
 
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  .material-icons {
+    color: white;
+    font-size: 24px;
+  }
+}
+
+.stat-content {
+  flex: 1;
+  
+  .stat-label {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.85rem;
+    color: #718096;
+    font-weight: 500;
+  }
+  
+  .stat-value {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2d3748;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE - TABLETS
+   ========================================== */
 @media (max-width: 768px) {
   .dashboard-header {
-    .header-content {
-      flex-direction: column;
-      gap: 1rem;
-    }
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
   }
   
-  .dashboard-main {
-    padding: 1rem;
+  .header-right {
+    width: 100%;
   }
   
-  .welcome-section h2 {
-    font-size: 1.5rem;
+  .user-menu {
+    width: 100%;
+    justify-content: space-between;
   }
   
   .cards-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE - MÓVILES
+   ========================================== */
+@media (max-width: 480px) {
+  .dashboard-header {
+    padding: 1rem;
+  }
+  
+  .welcome-section {
+    padding: 0 1rem;
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .cards-grid,
+  .stats-section {
+    padding: 0 1rem;
+  }
+  
+  .card,
+  .stat-card {
+    padding: 1rem;
   }
 }

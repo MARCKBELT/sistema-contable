@@ -1,0 +1,257 @@
+<!-- 
+  TEMPLATE: Configuración Component
+  
+  Propósito: Interfaz para gestionar parámetros del sistema
+  - Filtros por categoría
+  - Lista de parámetros editable
+  - Formularios de edición inline
+-->
+
+<div class="configuracion-container">
+  <!-- 
+    HEADER: Título y descripción
+  -->
+  <div class="configuracion-header">
+    <div class="header-content">
+      <span class="material-icons header-icon">settings</span>
+      <div class="header-text">
+        <h1>Configuración del Sistema</h1>
+        <p>Administra los parámetros configurables: salario mínimo, tipos de cambio, aportes, etc.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 
+    MENSAJES: Notificaciones de éxito/error
+    Se muestran temporalmente después de guardar
+  -->
+  @if (mensaje()) {
+    <div class="mensaje" [class.success]="mensaje()!.tipo === 'success'" [class.error]="mensaje()!.tipo === 'error'">
+      <span class="material-icons">
+        {{ mensaje()!.tipo === 'success' ? 'check_circle' : 'error' }}
+      </span>
+      <span>{{ mensaje()!.texto }}</span>
+    </div>
+  }
+
+  <!-- 
+    FILTROS: Categorías para filtrar parámetros
+  -->
+  <div class="filtros-container">
+    <h3>Filtrar por categoría</h3>
+    <div class="filtros-grid">
+      @for (cat of categorias; track cat.value) {
+        <button 
+          class="filtro-btn"
+          [class.active]="categoriaSeleccionada() === cat.value"
+          (click)="cambiarCategoria(cat.value)">
+          <span class="material-icons">{{ cat.icon }}</span>
+          <span>{{ cat.label }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- 
+    INDICADOR DE CARGA
+  -->
+  @if (cargando()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>Cargando parámetros...</p>
+    </div>
+  }
+
+  <!-- 
+    LISTA DE PARÁMETROS
+    Organizados por categoría con diseño de cards
+  -->
+  @if (!cargando() && parametrosFiltrados().length > 0) {
+    <div class="parametros-container">
+      <!-- 
+        Agrupación por categoría
+        Si está filtrado, muestra solo una categoría
+        Si está en "todas", agrupa por categorías
+      -->
+      @if (categoriaSeleccionada() === 'todas') {
+        <!-- Mostrar todas las categorías agrupadas -->
+        @for (categoria of ['laboral', 'financiero', 'tributario']; track categoria) {
+          @if (parametros().filter(p => p.categoria === categoria).length > 0) {
+            <div class="categoria-seccion">
+              <div class="categoria-header">
+                <span class="material-icons" [style.color]="obtenerColorCategoria(categoria)">
+                  {{ obtenerIconoCategoria(categoria) }}
+                </span>
+                <h2>{{ categoria === 'laboral' ? 'Parámetros Laborales' : categoria === 'financiero' ? 'Parámetros Financieros' : 'Parámetros Tributarios' }}</h2>
+              </div>
+              
+              <div class="parametros-grid">
+                @for (parametro of parametros().filter(p => p.categoria === categoria); track parametro.id) {
+                  <div class="parametro-card" [style.border-left-color]="obtenerColorCategoria(parametro.categoria)">
+                    <!-- 
+                      MODO VISTA: Mostrar información del parámetro
+                    -->
+                    @if (parametroEditando()?.id !== parametro.id) {
+                      <div class="parametro-info">
+                        <div class="parametro-nombre">
+                          <h4>{{ parametro.nombre }}</h4>
+                          @if (parametro.descripcion) {
+                            <p class="parametro-descripcion">{{ parametro.descripcion }}</p>
+                          }
+                        </div>
+                        <div class="parametro-valor-container">
+                          <span class="parametro-valor">{{ formatearValor(parametro) }}</span>
+                          @if (parametro.es_editable) {
+                            <button class="btn-editar" (click)="iniciarEdicion(parametro)">
+                              <span class="material-icons">edit</span>
+                              Editar
+                            </button>
+                          } @else {
+                            <span class="no-editable">
+                              <span class="material-icons">lock</span>
+                              No editable
+                            </span>
+                          }
+                        </div>
+                      </div>
+                    }
+
+                    <!-- 
+                      MODO EDICIÓN: Formulario para editar el valor
+                    -->
+                    @if (parametroEditando()?.id === parametro.id) {
+                      <div class="parametro-edicion">
+                        <div class="edicion-header">
+                          <h4>{{ parametro.nombre }}</h4>
+                        </div>
+                        
+                        <div class="edicion-form">
+                          <!-- Input según el tipo de parámetro -->
+                          @if (parametro.tipo === 'number') {
+                            <input 
+                              type="number" 
+                              class="input-editar"
+                              [(ngModel)]="valorTemporal"
+                              step="0.01"
+                              placeholder="Ingrese el valor">
+                          } @else if (parametro.tipo === 'boolean') {
+                            <select class="input-editar" [(ngModel)]="valorTemporal">
+                              <option value="true">Sí</option>
+                              <option value="false">No</option>
+                            </select>
+                          } @else {
+                            <input 
+                              type="text" 
+                              class="input-editar"
+                              [(ngModel)]="valorTemporal"
+                              placeholder="Ingrese el valor">
+                          }
+                          
+                          <div class="edicion-acciones">
+                            <button class="btn-cancelar" (click)="cancelarEdicion()">
+                              <span class="material-icons">close</span>
+                              Cancelar
+                            </button>
+                            <button class="btn-guardar" (click)="guardarParametro()">
+                              <span class="material-icons">save</span>
+                              Guardar
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+      } @else {
+        <!-- Mostrar solo la categoría filtrada -->
+        <div class="parametros-grid">
+          @for (parametro of parametrosFiltrados(); track parametro.id) {
+            <div class="parametro-card" [style.border-left-color]="obtenerColorCategoria(parametro.categoria)">
+              <!-- MODO VISTA -->
+              @if (parametroEditando()?.id !== parametro.id) {
+                <div class="parametro-info">
+                  <div class="parametro-nombre">
+                    <h4>{{ parametro.nombre }}</h4>
+                    @if (parametro.descripcion) {
+                      <p class="parametro-descripcion">{{ parametro.descripcion }}</p>
+                    }
+                  </div>
+                  <div class="parametro-valor-container">
+                    <span class="parametro-valor">{{ formatearValor(parametro) }}</span>
+                    @if (parametro.es_editable) {
+                      <button class="btn-editar" (click)="iniciarEdicion(parametro)">
+                        <span class="material-icons">edit</span>
+                        Editar
+                      </button>
+                    } @else {
+                      <span class="no-editable">
+                        <span class="material-icons">lock</span>
+                        No editable
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- MODO EDICIÓN -->
+              @if (parametroEditando()?.id === parametro.id) {
+                <div class="parametro-edicion">
+                  <div class="edicion-header">
+                    <h4>{{ parametro.nombre }}</h4>
+                  </div>
+                  
+                  <div class="edicion-form">
+                    @if (parametro.tipo === 'number') {
+                      <input 
+                        type="number" 
+                        class="input-editar"
+                        [(ngModel)]="valorTemporal"
+                        step="0.01"
+                        placeholder="Ingrese el valor">
+                    } @else if (parametro.tipo === 'boolean') {
+                      <select class="input-editar" [(ngModel)]="valorTemporal">
+                        <option value="true">Sí</option>
+                        <option value="false">No</option>
+                      </select>
+                    } @else {
+                      <input 
+                        type="text" 
+                        class="input-editar"
+                        [(ngModel)]="valorTemporal"
+                        placeholder="Ingrese el valor">
+                    }
+                    
+                    <div class="edicion-acciones">
+                      <button class="btn-cancelar" (click)="cancelarEdicion()">
+                        <span class="material-icons">close</span>
+                        Cancelar
+                      </button>
+                      <button class="btn-guardar" (click)="guardarParametro()">
+                        <span class="material-icons">save</span>
+                        Guardar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- 
+    MENSAJE: Sin parámetros
+  -->
+  @if (!cargando() && parametrosFiltrados().length === 0) {
+    <div class="sin-parametros">
+      <span class="material-icons">info</span>
+      <p>No hay parámetros en esta categoría</p>
+    </div>
+  }
+</div>
