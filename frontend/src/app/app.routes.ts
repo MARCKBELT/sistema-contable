@@ -1,38 +1,48 @@
-import { Routes } from '@angular/router';
-import { authGuard } from './core/guards/auth.guard';
+import { Routes } from "@angular/router";
+import { authGuard } from "./core/guards/auth.guard";
 
+/**
+ * RUTAS DE LA APLICACIÓN
+ * 
+ * Propósito: Define todas las rutas y su protección
+ */
 export const routes: Routes = [
   {
-    path: '',
-    redirectTo: 'login',
-    pathMatch: 'full'
+    path: "",
+    redirectTo: "login",
+    pathMatch: "full"
   },
   {
-    path: 'login',
-    loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent)
+    path: "login",
+    loadComponent: () => import("./features/auth/login/login.component").then(m => m.LoginComponent)
   },
   {
-    path: 'dashboard',
-    loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
+    path: "dashboard",
+    loadComponent: () => import("./features/dashboard/dashboard.component").then(m => m.DashboardComponent),
     canActivate: [authGuard]
   },
   {
-    path: 'contabilidad',
-    loadChildren: () => import('./features/contabilidad/contabilidad.routes').then(m => m.CONTABILIDAD_ROUTES),
+    path: "configuracion",
+    loadComponent: () => import("./features/configuracion/configuracion.component").then(m => m.ConfiguracionComponent),
     canActivate: [authGuard]
   },
   {
-    path: 'nominas',
-    loadChildren: () => import('./features/nominas/nominas.routes').then(m => m.NOMINAS_ROUTES),
+    path: "contabilidad",
+    loadChildren: () => import("./features/contabilidad/contabilidad.routes").then(m => m.CONTABILIDAD_ROUTES),
     canActivate: [authGuard]
   },
   {
-    path: 'facturacion',
-    loadChildren: () => import('./features/facturacion/facturacion.routes').then(m => m.FACTURACION_ROUTES),
+    path: "nominas",
+    loadChildren: () => import("./features/nominas/nominas.routes").then(m => m.NOMINAS_ROUTES),
     canActivate: [authGuard]
   },
   {
-    path: '**',
-    redirectTo: 'login'
+    path: "facturacion",
+    loadChildren: () => import("./features/facturacion/facturacion.routes").then(m => m.FACTURACION_ROUTES),
+    canActivate: [authGuard]
+  },
+  {
+    path: "**",
+    redirectTo: "login"
   }
 ];

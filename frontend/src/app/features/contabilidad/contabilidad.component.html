@@ -1,0 +1,260 @@
+<!-- TEMPLATE: Contabilidad Component -->
+<div class="contabilidad-container">
+    <!-- HEADER -->
+    <div class="contabilidad-header">
+      <div class="header-content">
+        <span class="material-icons header-icon">account_balance</span>
+        <div class="header-text">
+          <h1>Módulo de Contabilidad</h1>
+          <p>Plan de Cuentas y Comprobantes Contables</p>
+        </div>
+      </div>
+    </div>
+  
+    <!-- MENSAJES -->
+    @if (mensaje()) {
+      <div class="mensaje" [class.success]="mensaje()!.tipo === 'success'" [class.error]="mensaje()!.tipo === 'error'">
+        <span class="material-icons">
+          {{ mensaje()!.tipo === 'success' ? 'check_circle' : 'error' }}
+        </span>
+        <span>{{ mensaje()!.texto }}</span>
+      </div>
+    }
+  
+    <!-- TABS DE NAVEGACIÓN -->
+    <div class="tabs-container">
+      <button 
+        class="tab-btn"
+        [class.active]="vistaActual() === 'plan-cuentas'"
+        (click)="cambiarVista('plan-cuentas')">
+        <span class="material-icons">account_tree</span>
+        Plan de Cuentas
+      </button>
+      <button 
+        class="tab-btn"
+        [class.active]="vistaActual() === 'nuevo-comprobante'"
+        (click)="cambiarVista('nuevo-comprobante')">
+        <span class="material-icons">add_circle</span>
+        Nuevo Comprobante
+      </button>
+      <button 
+        class="tab-btn"
+        [class.active]="vistaActual() === 'comprobantes'"
+        (click)="cambiarVista('comprobantes')">
+        <span class="material-icons">list</span>
+        Comprobantes
+      </button>
+    </div>
+  
+    <!-- VISTA: PLAN DE CUENTAS -->
+    @if (vistaActual() === 'plan-cuentas') {
+      <div class="plan-cuentas-container">
+        <div class="section-header">
+          <h2>Plan de Cuentas</h2>
+          <p>{{ cuentas().length }} cuentas registradas</p>
+        </div>
+  
+        @if (cargandoCuentas()) {
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Cargando cuentas...</p>
+          </div>
+        }
+  
+        @if (!cargandoCuentas() && cuentas().length > 0) {
+          <div class="cuentas-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Código</th>
+                  <th>Nombre</th>
+                  <th>Tipo</th>
+                  <th>Naturaleza</th>
+                  <th>Saldo Actual</th>
+                  <th>Imputable</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cuenta of cuentas(); track cuenta.id) {
+                  <tr [class]="'nivel-' + cuenta.nivel">
+                    <td>
+                      <span class="codigo" [style.padding-left]="(cuenta.nivel - 1) * 20 + 'px'">
+                        {{ cuenta.codigo }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="nombre" [class.bold]="cuenta.nivel <= 2">
+                        {{ cuenta.nombre }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge" [style.background-color]="obtenerColorTipo(cuenta.tipo)">
+                        {{ cuenta.tipo }}
+                      </span>
+                    </td>
+                    <td>{{ cuenta.naturaleza }}</td>
+                    <td class="saldo">Bs {{ cuenta.saldo_actual }}</td>
+                    <td>
+                      @if (cuenta.es_imputable) {
+                        <span class="material-icons check">check_circle</span>
+                      } @else {
+                        <span class="material-icons cross">cancel</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+  
+    <!-- VISTA: NUEVO COMPROBANTE -->
+    @if (vistaActual() === 'nuevo-comprobante') {
+      <div class="comprobante-container">
+        <div class="section-header">
+          <h2>Nuevo Comprobante Contable</h2>
+          <p>Registrar asiento contable con partida doble</p>
+        </div>
+  
+        <div class="comprobante-form">
+          <!-- Encabezado del comprobante -->
+          <div class="form-header">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tipo de Comprobante</label>
+                <select [(ngModel)]="nuevoComprobante().tipo" class="form-control">
+                  <option value="ingreso">Ingreso</option>
+                  <option value="egreso">Egreso</option>
+                  <option value="traspaso">Traspaso</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label>Fecha</label>
+                <input type="date" [(ngModel)]="nuevoComprobante().fecha" class="form-control">
+              </div>
+            </div>
+  
+            <div class="form-group">
+              <label>Glosa (Descripción)</label>
+              <input 
+                type="text" 
+                [(ngModel)]="nuevoComprobante().glosa" 
+                placeholder="Descripción del comprobante"
+                class="form-control">
+            </div>
+          </div>
+  
+          <!-- Detalle del comprobante -->
+          <div class="detalle-container">
+            <div class="detalle-header">
+              <h3>Detalle del Comprobante</h3>
+              <button class="btn-agregar" (click)="agregarLinea()">
+                <span class="material-icons">add</span>
+                Agregar Línea
+              </button>
+            </div>
+  
+            <div class="detalle-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cuenta</th>
+                    <th>Glosa</th>
+                    <th>Debe</th>
+                    <th>Haber</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (detalle of nuevoComprobante().detalles; track $index) {
+                    <tr>
+                      <td>
+                        <select [(ngModel)]="detalle.cuenta_id" class="form-control">
+                          <option value="">Seleccione una cuenta</option>
+                          @for (cuenta of cuentasImputables(); track cuenta.id) {
+                            <option [value]="cuenta.id">{{ cuenta.codigo }} - {{ cuenta.nombre }}</option>
+                          }
+                        </select>
+                      </td>
+                      <td>
+                        <input 
+                          type="text" 
+                          [(ngModel)]="detalle.glosa" 
+                          placeholder="Descripción"
+                          class="form-control">
+                      </td>
+                      <td>
+                        <input 
+                          type="number" 
+                          [(ngModel)]="detalle.debe" 
+                          step="0.01"
+                          class="form-control">
+                      </td>
+                      <td>
+                        <input 
+                          type="number" 
+                          [(ngModel)]="detalle.haber" 
+                          step="0.01"
+                          class="form-control">
+                      </td>
+                      <td>
+                        <button class="btn-eliminar" (click)="eliminarLinea($index)">
+                          <span class="material-icons">delete</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr class="totales">
+                    <td colspan="2"><strong>TOTALES</strong></td>
+                    <td><strong>Bs {{ calcularTotales().debe.toFixed(2) }}</strong></td>
+                    <td><strong>Bs {{ calcularTotales().haber.toFixed(2) }}</strong></td>
+                    <td>
+                      @if (estaCuadrado() && nuevoComprobante().detalles.length > 0) {
+                        <span class="material-icons check">check_circle</span>
+                      } @else if (nuevoComprobante().detalles.length > 0) {
+                        <span class="material-icons cross">error</span>
+                      }
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+  
+            <div class="form-actions">
+              <button class="btn-cancelar" (click)="limpiarFormulario()">
+                <span class="material-icons">close</span>
+                Cancelar
+              </button>
+              <button 
+                class="btn-guardar" 
+                (click)="guardarComprobante()"
+                [disabled]="!estaCuadrado() || nuevoComprobante().detalles.length < 2">
+                <span class="material-icons">save</span>
+                Guardar Comprobante
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  
+    <!-- VISTA: LISTA DE COMPROBANTES -->
+    @if (vistaActual() === 'comprobantes') {
+      <div class="comprobantes-lista">
+        <div class="section-header">
+          <h2>Lista de Comprobantes</h2>
+          <p>Historial de asientos contables</p>
+        </div>
+        
+        <div class="mensaje-desarrollo">
+          <span class="material-icons">construction</span>
+          <p>Esta vista está en desarrollo</p>
+        </div>
+      </div>
+    }
+  </div>
