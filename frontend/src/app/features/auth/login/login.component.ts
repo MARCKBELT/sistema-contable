@@ -3,56 +3,57 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { LoginRequest } from '../../../shared/models/user.model';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss']
+  styleUrl: './login.component.scss'
 })
 export class LoginComponent {
-  credentials: LoginRequest = {
-    email: '',
-    password: ''
-  };
-
-  loading = signal(false);
-  error = signal<string | null>(null);
-  showPassword = signal(false);
+  email = signal('admin@contable.bo');
+  password = signal('Admin2026!');
+  cargando = signal(false);
+  error = signal('');
 
   constructor(
     private authService: AuthService,
     private router: Router
   ) {}
 
-  onSubmit(): void {
-    if (!this.credentials.email || !this.credentials.password) {
-      this.error.set('Por favor complete todos los campos');
+  login(): void {
+    if (!this.email() || !this.password()) {
+      this.error.set('Por favor ingrese email y contraseña');
       return;
     }
 
-    this.loading.set(true);
-    this.error.set(null);
+    this.cargando.set(true);
+    this.error.set('');
 
-    this.authService.login(this.credentials).subscribe({
+    this.authService.login(this.email(), this.password()).subscribe({
       next: (response) => {
         console.log('Login exitoso:', response);
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         console.error('Error en login:', err);
-        this.error.set(err.error?.message || 'Error al iniciar sesión');
-        this.loading.set(false);
+        this.error.set(err.error?.message || 'Error al iniciar sesión. Verifique sus credenciales.');
+        this.cargando.set(false);
       },
       complete: () => {
-        this.loading.set(false);
+        this.cargando.set(false);
       }
     });
   }
 
-  togglePassword(): void {
-    this.showPassword.update(v => !v);
+  onEmailChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.email.set(input.value);
+  }
+
+  onPasswordChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.password.set(input.value);
   }
 }

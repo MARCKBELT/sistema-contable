@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 import { ContabilidadComponent } from './contabilidad.component';
 
-export const CONTABILIDAD_ROUTES: Routes = [
+export const routes: Routes = [
   {
     path: '',
     component: ContabilidadComponent
   }
-];  
+];

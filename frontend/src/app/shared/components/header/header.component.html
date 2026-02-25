@@ -1,0 +1,82 @@
+<header class="header">
+  <div class="header-content">
+    <!-- Logo y título -->
+    <div class="header-left">
+      <div class="logo">
+        <span class="logo-icon">📊</span>
+        <span class="logo-text">Sistema Contable</span>
+      </div>
+    </div>
+
+    <!-- Selector de empresa -->
+    <div class="header-center">
+      <div class="empresa-selector" (click)="toggleSelectorEmpresa()">
+        <div class="empresa-info">
+          <span class="empresa-nombre">{{ empresaActiva()?.razon_social || 'Sin empresa' }}</span>
+          <span class="empresa-nit">NIT: {{ empresaActiva()?.nit }}</span>
+        </div>
+        <span class="dropdown-icon">▼</span>
+
+        <!-- Dropdown de empresas -->
+        @if (mostrarSelectorEmpresa) {
+          <div class="dropdown-menu" (click)="$event.stopPropagation()">
+            <div class="dropdown-header">
+              <span>Cambiar Empresa</span>
+            </div>
+            @for (empresa of empresas(); track empresa.id) {
+              <div 
+                class="dropdown-item"
+                [class.active]="empresa.id === empresaActiva()?.id"
+                (click)="cambiarEmpresa(empresa.id)"
+              >
+                <div class="empresa-item">
+                  <span class="empresa-item-nombre">{{ empresa.razon_social }}</span>
+                  <span class="empresa-item-nit">{{ empresa.nit }}</span>
+                  <span class="empresa-item-actividad">{{ empresa.actividad_economica }}</span>
+                </div>
+                @if (empresa.id === empresaActiva()?.id) {
+                  <span class="check-icon">✓</span>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Menú usuario -->
+    <div class="header-right">
+      <div class="user-menu" (click)="toggleMenuUsuario()">
+        <div class="user-avatar">
+          {{ usuario()?.nombre?.charAt(0) || 'U' }}
+        </div>
+        <div class="user-info">
+          <span class="user-name">{{ usuario()?.nombre }}</span>
+          <span class="user-role">{{ usuario()?.rol }}</span>
+        </div>
+        <span class="dropdown-icon">▼</span>
+
+        <!-- Dropdown usuario -->
+        @if (mostrarMenuUsuario) {
+          <div class="dropdown-menu dropdown-menu-right" (click)="$event.stopPropagation()">
+            <div class="dropdown-item" (click)="cerrarMenus()">
+              <span>👤 Mi Perfil</span>
+            </div>
+            <div class="dropdown-item" (click)="cerrarMenus()">
+              <span>⚙️ Configuración</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item logout" (click)="logout()">
+              <span>🚪 Cerrar Sesión</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Overlay para cerrar dropdowns -->
+@if (mostrarMenuUsuario || mostrarSelectorEmpresa) {
+  <div class="overlay" (click)="cerrarMenus()"></div>
+}
