@@ -1,0 +1,73 @@
+.sidebar {
+  width: 260px;
+  background: white;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+  position: sticky;
+  top: 64px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 20px 12px;
+  overflow-y: auto;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 4px;
+  border-radius: 8px;
+  color: #4a5568;
+  text-decoration: none;
+  transition: all 0.3s;
+  cursor: pointer;
+
+  &:hover {
+    background: #f7fafc;
+    color: #667eea;
+    transform: translateX(4px);
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+  }
+
+  .sidebar-icon {
+    font-size: 20px;
+  }
+
+  .sidebar-label {
+    font-size: 14px;
+  }
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid #e2e8f0;
+  background: #f7fafc;
+}
+
+.version-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+
+  .version-label {
+    font-size: 12px;
+    color: #718096;
+    font-weight: 500;
+  }
+
+  .version-number {
+    font-size: 11px;
+    color: #a0aec0;
+  }
+}

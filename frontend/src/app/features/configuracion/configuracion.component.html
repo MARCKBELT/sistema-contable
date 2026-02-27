@@ -1,1 +1,101 @@
-<p>configuracion works!</p>
+<div class="config-layout">
+  <app-header />
+  
+  <div class="config-container">
+    <app-sidebar />
+    
+    <main class="config-content">
+      <div class="config-header">
+        <h1>⚙️ Configuración del Sistema</h1>
+        <p>Gestión de parámetros generales del sistema contable</p>
+      </div>
+
+      <!-- Mensaje de feedback -->
+      @if (mensaje()) {
+        <div class="mensaje" [class.success]="mensaje()?.tipo === 'success'" [class.error]="mensaje()?.tipo === 'error'">
+          {{ mensaje()?.texto }}
+        </div>
+      }
+
+      <!-- Loading -->
+      @if (cargando) {
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Cargando parámetros...</p>
+        </div>
+      }
+
+      <!-- Parámetros por categoría -->
+      @if (!cargando) {
+        <div class="categorias-grid">
+          @for (categoria of categorias; track categoria) {
+            <div class="categoria-card">
+              <div class="categoria-header">
+                <span class="categoria-icono">{{ getIconoCategoria(categoria) }}</span>
+                <h2>{{ getNombreCategoria(categoria) }}</h2>
+              </div>
+
+              <div class="parametros-list">
+                @for (parametro of obtenerPorCategoria(categoria); track parametro.id) {
+                  <div class="parametro-item" [class.no-editable]="!parametro.editable">
+                    <div class="parametro-info">
+                      <span class="parametro-nombre">{{ parametro.descripcion }}</span>
+                      <span class="parametro-key">{{ parametro.nombre }}</span>
+                    </div>
+
+                    @if (parametroEditando() === parametro.id) {
+                      <!-- Modo edición -->
+                      <div class="parametro-edit">
+                        <input 
+                          type="text"
+                          [(ngModel)]="valorTemporal"
+                          [disabled]="guardando()"
+                          class="parametro-input"
+                        />
+                        <div class="parametro-actions">
+                          <button 
+                            class="btn-save"
+                            (click)="guardarParametro(parametro)"
+                            [disabled]="guardando()"
+                          >
+                            @if (guardando()) {
+                              <span class="spinner-small"></span>
+                            } @else {
+                              ✓
+                            }
+                          </button>
+                          <button 
+                            class="btn-cancel"
+                            (click)="cancelarEdicion()"
+                            [disabled]="guardando()"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    } @else {
+                      <!-- Modo vista -->
+                      <div class="parametro-valor-container">
+                        <span class="parametro-valor">{{ parametro.valor }}</span>
+                        @if (parametro.editable) {
+                          <button 
+                            class="btn-edit"
+                            (click)="iniciarEdicion(parametro)"
+                          >
+                            ✎ Editar
+                          </button>
+                        } @else {
+                          <span class="badge-readonly">Solo lectura</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </main>
+  </div>
+</div>

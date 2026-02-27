@@ -1,1 +1,94 @@
-<p>dashboard works!</p>
+<div class="dashboard-layout">
+  <app-header />
+  
+  <div class="dashboard-container">
+    <app-sidebar />
+    
+    <main class="dashboard-content">
+      <div class="welcome-section">
+        <h1>¡Bienvenido, {{ usuario?.nombre }}! 👋</h1>
+        <p>Empresa activa: <strong>{{ empresaActiva?.razon_social }}</strong></p>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-content">
+            <span class="kpi-label">Salario Mínimo Nacional</span>
+            <span class="kpi-value">Bs {{ salarioMinimo | number:'1.2-2' }}</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon">💵</div>
+          <div class="kpi-content">
+            <span class="kpi-label">Tipo de Cambio USD/BOB</span>
+            <span class="kpi-value">Bs {{ tipoCambio }}</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon">📊</div>
+          <div class="kpi-content">
+            <span class="kpi-label">UFV Actual</span>
+            <span class="kpi-value">{{ ufvActual }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información de la empresa -->
+      <div class="info-section">
+        <div class="info-card">
+          <h2>Información de la Empresa</h2>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Razón Social:</span>
+              <span class="info-value">{{ empresaActiva?.razon_social }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">NIT:</span>
+              <span class="info-value">{{ empresaActiva?.nit }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Actividad Económica:</span>
+              <span class="info-value">{{ empresaActiva?.actividad_economica }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Nombre Comercial:</span>
+              <span class="info-value">{{ empresaActiva?.nombre_comercial }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <h2>Accesos Rápidos</h2>
+          <div class="quick-actions">
+            <a href="/contabilidad" class="quick-action">
+              <span class="action-icon">📒</span>
+              <span class="action-label">Plan de Cuentas</span>
+            </a>
+            <a href="/configuracion" class="quick-action">
+              <span class="action-icon">⚙️</span>
+              <span class="action-label">Configuración</span>
+            </a>
+            <a href="/nominas" class="quick-action">
+              <span class="action-icon">👥</span>
+              <span class="action-label">Nóminas</span>
+            </a>
+            <a href="/reportes" class="quick-action">
+              <span class="action-icon">📈</span>
+              <span class="action-label">Reportes</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Próximamente -->
+      <div class="coming-soon">
+        <h3>📊 Gráficos y Estadísticas</h3>
+        <p>Los gráficos animados de ingresos, egresos y utilidades estarán disponibles próximamente.</p>
+      </div>
+    </main>
+  </div>
+</div>

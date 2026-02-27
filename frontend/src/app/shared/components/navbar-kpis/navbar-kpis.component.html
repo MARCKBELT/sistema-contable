@@ -1,0 +1,40 @@
+<div class="navbar-kpis">
+  <div class="kpis-container">
+    @for (kpi of kpisMostrar; track kpi.id) {
+      <div class="kpi-item">
+        <span class="kpi-icono">{{ kpi.icono }}</span>
+        <div class="kpi-data">
+          <span class="kpi-label">{{ kpi.label }}</span>
+          <span class="kpi-valor">{{ kpi.valor }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <button class="btn-config" (click)="toggleSelector()" title="Configurar KPIs">
+    ⚙️
+  </button>
+
+  @if (mostrarSelector()) {
+    <div class="selector-dropdown">
+      <div class="selector-header">
+        <span>Mostrar en navbar</span>
+        <span class="selector-info">Selecciona 1-4 indicadores</span>
+      </div>
+      @for (kpi of kpisDisponibles; track kpi.id) {
+        <div 
+          class="selector-item"
+          [class.selected]="kpisSeleccionados().includes(kpi.id)"
+          (click)="toggleKpi(kpi.id)"
+        >
+          <span class="selector-icono">{{ kpi.icono }}</span>
+          <span class="selector-label">{{ kpi.label }}</span>
+          @if (kpisSeleccionados().includes(kpi.id)) {
+            <span class="check">✓</span>
+          }
+        </div>
+      }
+    </div>
+    <div class="overlay" (click)="cerrarSelector()"></div>
+  }
+</div>

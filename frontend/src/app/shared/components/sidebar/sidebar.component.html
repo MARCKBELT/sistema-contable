@@ -1,1 +1,23 @@
-<p>sidebar works!</p>
+<aside class="sidebar">
+  <nav class="sidebar-nav">
+    @for (item of menuItems; track item.route) {
+      @if (puedeVerItem(item)) {
+        <a 
+          [routerLink]="item.route" 
+          class="sidebar-item"
+          [class.active]="isActive(item.route)"
+          routerLinkActive="active"
+        >
+          <span class="sidebar-icon">{{ item.icon }}</span>
+          <span class="sidebar-label">{{ item.label }}</span>
+        </a>
+      }
+    }
+  </nav>
+  <div class="sidebar-footer">
+    <div class="version-info">
+      <span class="version-label">Sistema Contable Bolivia</span>
+      <span class="version-number">v1.1</span>
+    </div>
+  </div>
+</aside>

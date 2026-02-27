@@ -7,26 +7,28 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = authService.getToken();
   const empresaActiva = authService.empresaActiva();
 
-  // Clonar la petición y agregar headers
-  let clonedReq = req;
+  // Si no hay token ni empresa, continuar sin modificar
+  if (!token && !empresaActiva) {
+    return next(req);
+  }
 
+  // Crear objeto de headers
+  const headers: Record<string, string> = {};
+
+  // Agregar token si existe
   if (token) {
-    clonedReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
-  // Agregar empresa_id en header si existe
-  if (empresaActiva) {
-    clonedReq = clonedReq.clone({
-      setHeaders: {
-        ...clonedReq.headers,
-        'X-Empresa-Id': empresaActiva.id
-      }
-    });
+  // Agregar empresa_id si existe
+  if (empresaActiva?.id) {
+    headers['X-Empresa-Id'] = empresaActiva.id;
   }
+
+  // Clonar request con nuevos headers
+  const clonedReq = req.clone({
+    setHeaders: headers
+  });
 
   return next(clonedReq);
 };

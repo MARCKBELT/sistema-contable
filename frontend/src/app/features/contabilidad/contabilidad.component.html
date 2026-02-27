@@ -1,1 +1,238 @@
-<p>contabilidad works!</p>
+<div class="puct-layout">
+  <app-header />
+  
+  <div class="puct-container">
+    <app-sidebar />
+    
+    <main class="puct-content">
+      <div class="puct-header">
+        <div class="header-left">
+          <h1>📒 Plan Único de Cuentas Tributario (PUCT)</h1>
+          <p>Gestión del plan de cuentas para {{ empresaActiva?.actividad_economica }}</p>
+        </div>
+        <div class="header-right">
+          @if (puedeCrear()) {
+            <button class="btn-primary" (click)="abrirFormulario()">
+              ➕ Nueva Cuenta
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Mensaje -->
+      @if (mensaje()) {
+        <div class="mensaje" [class.success]="mensaje()?.tipo === 'success'" [class.error]="mensaje()?.tipo === 'error'">
+          {{ mensaje()?.texto }}
+        </div>
+      }
+
+      <!-- Filtros -->
+      <div class="filtros-card">
+        <div class="filtros-grid">
+          <div class="filtro-item">
+            <label>🔍 Buscar</label>
+            <input 
+              type="text" 
+              [(ngModel)]="busqueda"
+              (input)="aplicarFiltros()"
+              placeholder="Código o nombre..."
+            />
+          </div>
+
+          <div class="filtro-item">
+            <label>📊 Nivel</label>
+            <select [(ngModel)]="filtroNivel" (change)="aplicarFiltros()">
+              <option [ngValue]="null">Todos los niveles</option>
+              <option [ngValue]="1">Nivel 1</option>
+              <option [ngValue]="2">Nivel 2</option>
+              <option [ngValue]="3">Nivel 3</option>
+              <option [ngValue]="4">Nivel 4</option>
+              <option [ngValue]="5">Nivel 5</option>
+            </select>
+          </div>
+
+          <div class="filtro-item">
+            <label>🏷️ Tipo</label>
+            <select [(ngModel)]="filtroTipo" (change)="aplicarFiltros()">
+              <option [ngValue]="null">Todos los tipos</option>
+              <option value="activo">Activo</option>
+              <option value="pasivo">Pasivo</option>
+              <option value="patrimonio">Patrimonio</option>
+              <option value="ingreso">Ingreso</option>
+              <option value="gasto">Gasto</option>
+            </select>
+          </div>
+
+          <div class="filtro-item">
+            <button class="btn-secondary" (click)="limpiarFiltros()">
+              🔄 Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      @if (cargando) {
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Cargando plan de cuentas...</p>
+        </div>
+      }
+
+      <!-- Tabla de cuentas -->
+      @if (!cargando) {
+        <div class="tabla-card">
+          <div class="tabla-info">
+            <span>Total de cuentas: <strong>{{ cuentas.length }}</strong></span>
+          </div>
+
+          @if (cuentas.length === 0) {
+            <div class="empty-state">
+              <span class="empty-icon">📋</span>
+              <h3>No hay cuentas registradas</h3>
+              <p>Comienza agregando cuentas al plan de cuentas</p>
+            </div>
+          } @else {
+            <div class="tabla-responsive">
+              <table class="tabla-cuentas">
+                <thead>
+                  <tr>
+                    <th>Nivel</th>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Naturaleza</th>
+                    <th>Imputable</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (cuenta of cuentas; track cuenta.id) {
+                    <tr [class.nivel-1]="cuenta.nivel === 1"
+                        [class.nivel-2]="cuenta.nivel === 2"
+                        [class.nivel-3]="cuenta.nivel === 3"
+                        [class.nivel-4]="cuenta.nivel === 4"
+                        [class.nivel-5]="cuenta.nivel === 5">
+                      <td>
+                        <span class="badge-nivel">{{ getIconoPorNivel(cuenta.nivel) }}</span>
+                      </td>
+                      <td>
+                        <code class="codigo">{{ cuenta.codigo }}</code>
+                      </td>
+                      <td class="nombre-col">{{ cuenta.nombre }}</td>
+                      <td>
+                        <span class="badge-tipo" [style.background-color]="getColorPorTipo(cuenta.tipo)">
+                          {{ cuenta.tipo }}
+                        </span>
+                      </td>
+                      <td>{{ cuenta.naturaleza }}</td>
+                      <td>
+                        @if (cuenta.es_imputable) {
+                          <span class="badge-si">✓ Sí</span>
+                        } @else {
+                          <span class="badge-no">✗ No</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+    </main>
+  </div>
+</div>
+
+<!-- Modal Nueva Cuenta -->
+@if (mostrarFormulario()) {
+  <div class="modal-overlay" (click)="cerrarFormulario()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>➕ Nueva Cuenta</h2>
+        <button class="btn-close" (click)="cerrarFormulario()">✕</button>
+      </div>
+
+      <form (submit)="$event.preventDefault(); crearCuenta()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Código *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="nuevaCuenta().codigo"
+              name="codigo"
+              placeholder="Ej: 1-1-1-001-001"
+              required
+            />
+            <small>Formato según nivel: 5️⃣ 1-1-1-001-001</small>
+          </div>
+
+          <div class="form-group">
+            <label>Nivel *</label>
+            <select [(ngModel)]="nuevaCuenta().nivel" name="nivel">
+              <option [ngValue]="5">Nivel 5 (Imputable)</option>
+              <option [ngValue]="4" [disabled]="usuario?.rol !== 'ADMINISTRADOR'">
+                Nivel 4 (Solo Admin)
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Nombre *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="nuevaCuenta().nombre"
+              name="nombre"
+              placeholder="Nombre de la cuenta"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Tipo *</label>
+            <select [(ngModel)]="nuevaCuenta().tipo" name="tipo">
+              <option value="activo">Activo</option>
+              <option value="pasivo">Pasivo</option>
+              <option value="patrimonio">Patrimonio</option>
+              <option value="ingreso">Ingreso</option>
+              <option value="gasto">Gasto</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Naturaleza *</label>
+            <select [(ngModel)]="nuevaCuenta().naturaleza" name="naturaleza">
+              <option value="deudora">Deudora</option>
+              <option value="acreedora">Acreedora</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="nuevaCuenta().es_imputable"
+                name="es_imputable"
+              />
+              <span>Es imputable (permite movimientos)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="cerrarFormulario()" [disabled]="guardando()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">
+            @if (guardando()) {
+              <span class="spinner-small"></span>
+              Guardando...
+            } @else {
+              Crear Cuenta
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

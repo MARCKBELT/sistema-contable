@@ -1,0 +1,161 @@
+.navbar-kpis {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 64px;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.kpis-container {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+}
+
+.kpi-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: #f7fafc;
+  border-radius: 8px;
+  transition: all 0.3s;
+
+  &:hover {
+    background: #edf2f7;
+    transform: translateY(-1px);
+  }
+
+  .kpi-icono {
+    font-size: 20px;
+  }
+
+  .kpi-data {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .kpi-label {
+      font-size: 11px;
+      color: #718096;
+      font-weight: 500;
+    }
+
+    .kpi-valor {
+      font-size: 14px;
+      font-weight: 700;
+      color: #2d3748;
+    }
+  }
+}
+
+.btn-config {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+
+  &:hover {
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+}
+
+.selector-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  min-width: 240px;
+  z-index: 1001;
+  animation: slideDown 0.2s ease-out;
+}
+
+.selector-header {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span:first-child {
+    font-weight: 600;
+    font-size: 14px;
+    color: #2d3748;
+  }
+
+  .selector-info {
+    font-size: 11px;
+    color: #a0aec0;
+  }
+}
+
+.selector-item {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f7fafc;
+  }
+
+  &.selected {
+    background: #edf2f7;
+
+    .selector-label {
+      font-weight: 600;
+      color: #667eea;
+    }
+  }
+
+  .selector-icono {
+    font-size: 18px;
+  }
+
+  .selector-label {
+    flex: 1;
+    font-size: 13px;
+    color: #2d3748;
+  }
+
+  .check {
+    color: #48bb78;
+    font-weight: 700;
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
