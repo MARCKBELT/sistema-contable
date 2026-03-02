@@ -22,12 +22,14 @@
         </div>
       </div>
 
+      <!-- Mensaje -->
       @if (mensaje()) {
         <div class="mensaje" [class.success]="mensaje()?.tipo === 'success'" [class.error]="mensaje()?.tipo === 'error'">
           {{ mensaje()?.texto }}
         </div>
       }
 
+      <!-- Filtros -->
       <div class="filtros-card">
         <div class="filtros-grid">
           <div class="filtro-item">
@@ -72,6 +74,7 @@
         </div>
       </div>
 
+      <!-- Loading -->
       @if (cargando) {
         <div class="loading">
           <div class="spinner"></div>
@@ -79,6 +82,7 @@
         </div>
       }
 
+      <!-- Tabla de cuentas -->
       @if (!cargando) {
         <div class="tabla-card">
           <div class="tabla-info">
@@ -239,96 +243,104 @@
   </div>
 }
 
-<!-- Modal Nueva Cuenta COMPACTO -->
+<!-- Modal Nueva Cuenta MEJORADO -->
 @if (mostrarFormulario()) {
   <div class="modal-overlay" (click)="cerrarFormulario()">
-    <div class="modal-content modal-compact" (click)="$event.stopPropagation()">
+    <div class="modal-content modal-large" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>➕ Nueva Cuenta Nivel 5</h2>
         <button class="btn-close" (click)="cerrarFormulario()">✕</button>
       </div>
 
       <form (submit)="$event.preventDefault(); crearCuenta()">
-        <div class="form-body-compact">
+        <div class="form-body">
           
-          <div class="form-grid-compact">
-            <!-- Cuenta Padre -->
-            <div class="form-group">
-              <label>1️⃣ Cuenta Padre (Nivel 4) *</label>
+          <!-- Paso 1: Seleccionar cuenta padre -->
+          <div class="form-section">
+            <h3>1️⃣ Seleccionar Cuenta Padre (Nivel 4)</h3>
+            <div class="form-group full-width">
+              <label>Cuenta Padre *</label>
               <select 
                 [(ngModel)]="cuentaPadreSeleccionada"
                 (change)="onCuentaPadreChange(cuentaPadreSeleccionada())"
                 name="cuentaPadre"
                 required
               >
-                <option value="">-- Seleccione cuenta padre --</option>
+                <option value="">-- Seleccione una cuenta de nivel 4 --</option>
                 @for (cuenta of cuentasNivel4; track cuenta.id) {
                   <option [value]="cuenta.codigo">
                     {{ cuenta.codigo }} - {{ cuenta.nombre }}
                   </option>
                 }
               </select>
+              <small>Seleccione la cuenta padre donde se creará la nueva cuenta</small>
             </div>
+          </div>
 
-            <!-- Código Generado -->
-            <div class="form-group">
-              <label>2️⃣ Código Asignado</label>
-              <div class="codigo-display">
-                @if (codigoGenerado()) {
-                  <code>{{ codigoGenerado() }}</code>
-                  <span class="badge-auto">✓ Auto</span>
-                } @else {
-                  <span class="codigo-placeholder">Seleccione cuenta padre</span>
-                }
+          <!-- Paso 2: Código generado automáticamente -->
+          @if (codigoGenerado()) {
+            <div class="form-section">
+              <h3>2️⃣ Código Asignado Automáticamente</h3>
+              <div class="codigo-preview">
+                <code class="codigo-grande">{{ codigoGenerado() }}</code>
+                <span class="codigo-info">✓ Código generado automáticamente</span>
               </div>
             </div>
 
-            <!-- Nombre -->
-            <div class="form-group full-width">
-              <label>3️⃣ Nombre de la Cuenta *</label>
-              <input 
-                type="text" 
-                [(ngModel)]="nombreCuenta"
-                name="nombre"
-                placeholder="Ej: Banco Nacional de Bolivia"
-                required
-                [disabled]="!codigoGenerado()"
-              />
-            </div>
-
-            <!-- Tipo -->
-            <div class="form-group">
-              <label>Tipo *</label>
-              <select [(ngModel)]="tipoSeleccionado" name="tipo">
-                <option value="activo">Activo</option>
-                <option value="pasivo">Pasivo</option>
-                <option value="patrimonio">Patrimonio</option>
-                <option value="ingreso">Ingreso</option>
-                <option value="gasto">Gasto</option>
-              </select>
-            </div>
-
-            <!-- Naturaleza -->
-            <div class="form-group">
-              <label>Naturaleza *</label>
-              <select [(ngModel)]="naturalezaSeleccionada" name="naturaleza">
-                <option value="deudora">Deudora</option>
-                <option value="acreedora">Acreedora</option>
-              </select>
-            </div>
-
-            <!-- Imputable -->
-            <div class="form-group full-width">
-              <label class="checkbox-label">
+            <!-- Paso 3: Información de la cuenta -->
+            <div class="form-section">
+              <h3>3️⃣ Información de la Cuenta</h3>
+              
+              <div class="form-group full-width">
+                <label>Nombre de la Cuenta *</label>
                 <input 
-                  type="checkbox" 
-                  [(ngModel)]="esImputable"
-                  name="es_imputable"
+                  type="text" 
+                  [(ngModel)]="nombreCuenta"
+                  name="nombre"
+                  placeholder="Ej: Banco Nacional de Bolivia"
+                  required
+                  autofocus
                 />
-                <span>Es imputable (permite movimientos contables)</span>
-              </label>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label>Tipo *</label>
+                  <select [(ngModel)]="tipoSeleccionado" name="tipo">
+                    <option value="activo">Activo</option>
+                    <option value="pasivo">Pasivo</option>
+                    <option value="patrimonio">Patrimonio</option>
+                    <option value="ingreso">Ingreso</option>
+                    <option value="gasto">Gasto</option>
+                  </select>
+                  <small>Heredado de la cuenta padre</small>
+                </div>
+
+                <div class="form-group">
+                  <label>Naturaleza *</label>
+                  <select [(ngModel)]="naturalezaSeleccionada" name="naturaleza">
+                    <option value="deudora">Deudora</option>
+                    <option value="acreedora">Acreedora</option>
+                  </select>
+                  <small>Heredado de la cuenta padre</small>
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label class="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    [(ngModel)]="esImputable"
+                    name="es_imputable"
+                  />
+                  <span>Es imputable (permite registrar movimientos contables)</span>
+                </label>
+                <small class="info-box">
+                  ℹ️ Las cuentas de nivel 5 normalmente son imputables
+                </small>
+              </div>
             </div>
-          </div>
+          }
         </div>
 
         <div class="modal-footer">

@@ -247,3 +247,116 @@ app.delete('/api/contabilidad/cuentas/:id', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`📊 Contabilidad Service corriendo en puerto ${PORT}`);
 });
+
+// ==================== IMPORTACIÓN PUCT ====================
+
+const multer = require('multer');
+const csv = require('csv-parser');
+const fs = require('fs');
+
+const upload = multer({ dest: '/tmp/' });
+
+// Importar PUCT desde CSV
+app.post('/api/contabilidad/cuentas/importar', upload.single('file'), async (req, res) => {
+  try {
+    const empresaId = req.headers['x-empresa-id'];
+    
+    if (!empresaId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de empresa no proporcionado'
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No se proporcionó archivo'
+      });
+    }
+
+    const cuentas = [];
+    let errores = [];
+    let importadas = 0;
+    let duplicadas = 0;
+
+    // Leer CSV
+    await new Promise((resolve, reject) => {
+      fs.createReadStream(req.file.path)
+        .pipe(csv())
+        .on('data', (row) => {
+          cuentas.push(row);
+        })
+        .on('end', resolve)
+        .on('error', reject);
+    });
+
+    // Insertar cuentas
+    for (const cuenta of cuentas) {
+      try {
+        // Verificar si ya existe
+        const existe = await pool.query(
+          'SELECT id FROM contabilidad.cuentas_contables WHERE empresa_id = $1 AND codigo = $2',
+          [empresaId, cuenta.codigo]
+        );
+
+        if (existe.rows.length > 0) {
+          duplicadas++;
+          continue;
+        }
+
+        // Insertar cuenta
+        await pool.query(`
+          INSERT INTO contabilidad.cuentas_contables 
+          (empresa_id, codigo, nombre, nivel, tipo, naturaleza, es_imputable,
+           aplica_comercial, aplica_servicios, aplica_transporte, aplica_industrial,
+           aplica_petrolera, aplica_construccion, aplica_agropecuaria, aplica_minera)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        `, [
+          empresaId,
+          cuenta.codigo,
+          cuenta.nombre,
+          parseInt(cuenta.nivel),
+          cuenta.tipo,
+          cuenta.naturaleza,
+          cuenta.es_imputable === 'true',
+          cuenta.aplica_comercial === 'true',
+          cuenta.aplica_servicios === 'true',
+          cuenta.aplica_transporte === 'true',
+          cuenta.aplica_industrial === 'true',
+          cuenta.aplica_petrolera === 'true',
+          cuenta.aplica_construccion === 'true',
+          cuenta.aplica_agropecuaria === 'true',
+          cuenta.aplica_minera === 'true'
+        ]);
+
+        importadas++;
+      } catch (error) {
+        errores.push(`Error en cuenta ${cuenta.codigo}: ${error.message}`);
+      }
+    }
+
+    // Eliminar archivo temporal
+    fs.unlinkSync(req.file.path);
+
+    res.json({
+      success: true,
+      message: 'Importación completada',
+      data: {
+        total: cuentas.length,
+        importadas,
+        duplicadas,
+        errores: errores.length
+      },
+      errores: errores.slice(0, 10) // Solo primeros 10 errores
+    });
+
+  } catch (error) {
+    console.error('Error en importación:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al importar PUCT',
+      error: error.message
+    });
+  }
+});

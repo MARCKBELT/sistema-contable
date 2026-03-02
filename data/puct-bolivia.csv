@@ -1,0 +1,113 @@
+codigo,nombre,nivel,tipo,naturaleza,es_imputable,aplica_comercial,aplica_servicios,aplica_transporte,aplica_industrial,aplica_petrolera,aplica_construccion,aplica_agropecuaria,aplica_minera
+1,ACTIVO,1,activo,deudora,false,true,true,true,true,true,true,true,true
+1-1,ACTIVO CORRIENTE,2,activo,deudora,false,true,true,true,true,true,true,true,true
+1-1-1,DISPONIBILIDADES,3,activo,deudora,false,true,true,true,true,true,true,true,true
+1-1-1-001,CAJA,4,activo,deudora,false,true,true,true,true,true,true,true,true
+1-1-1-001-001,Caja Moneda Nacional,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-1-1-001-002,Caja Moneda Extranjera,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-1-1-002,BANCOS,4,activo,deudora,false,true,true,true,true,true,true,true,true
+1-1-1-002-001,Banco Moneda Nacional,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-1-1-002-002,Banco Moneda Extranjera,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-1-2,INVERSIONES TEMPORARIAS,3,activo,deudora,false,true,true,true,true,true,true,true,true
+1-1-2-001,INVERSIONES EN DPF,4,activo,deudora,false,true,true,true,true,true,true,true,true
+1-1-2-001-001,DPF Moneda Nacional,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-1-2-001-002,DPF Moneda Extranjera,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-1-3,CUENTAS POR COBRAR,3,activo,deudora,false,true,true,true,true,true,true,true,true
+1-1-3-001,DOCUMENTOS POR COBRAR,4,activo,deudora,false,true,true,true,true,true,true,true,true
+1-1-3-001-001,Letras por Cobrar,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-1-3-001-002,Pagarés por Cobrar,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-1-3-002,CUENTAS POR COBRAR COMERCIALES,4,activo,deudora,false,true,true,true,true,true,true,true,true
+1-1-3-002-001,Clientes,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-1-3-002-002,Deudores Varios,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-1-4,INVENTARIOS,3,activo,deudora,false,true,false,false,true,true,true,true,true
+1-1-4-001,MERCADERÍAS,4,activo,deudora,false,true,false,false,false,false,false,false,false
+1-1-4-001-001,Inventario de Mercaderías,5,activo,deudora,true,true,false,false,false,false,false,false,false
+1-1-4-002,PRODUCTOS TERMINADOS,4,activo,deudora,false,false,false,false,true,true,true,true,true
+1-1-4-002-001,Productos Terminados,5,activo,deudora,true,false,false,false,true,true,true,true,true
+1-1-4-003,MATERIAS PRIMAS,4,activo,deudora,false,false,false,false,true,true,true,true,true
+1-1-4-003-001,Materias Primas,5,activo,deudora,true,false,false,false,true,true,true,true,true
+1-2,ACTIVO NO CORRIENTE,2,activo,deudora,false,true,true,true,true,true,true,true,true
+1-2-1,PROPIEDAD PLANTA Y EQUIPO,3,activo,deudora,false,true,true,true,true,true,true,true,true
+1-2-1-001,BIENES DE USO,4,activo,deudora,false,true,true,true,true,true,true,true,true
+1-2-1-001-001,Terrenos,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-2-1-001-002,Edificios,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-2-1-001-003,Maquinaria y Equipo,5,activo,deudora,true,false,false,false,true,true,true,true,true
+1-2-1-001-004,Muebles y Enseres,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-2-1-001-005,Vehículos,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-2-1-001-006,Equipos de Computación,5,activo,deudora,true,true,true,true,true,true,true,true,true
+1-2-1-002,DEPRECIACIÓN ACUMULADA,4,activo,acreedora,false,true,true,true,true,true,true,true,true
+1-2-1-002-001,Dep. Acum. Edificios,5,activo,acreedora,true,true,true,true,true,true,true,true,true
+1-2-1-002-002,Dep. Acum. Maquinaria y Equipo,5,activo,acreedora,true,false,false,false,true,true,true,true,true
+1-2-1-002-003,Dep. Acum. Muebles y Enseres,5,activo,acreedora,true,true,true,true,true,true,true,true,true
+1-2-1-002-004,Dep. Acum. Vehículos,5,activo,acreedora,true,true,true,true,true,true,true,true,true
+1-2-1-002-005,Dep. Acum. Equipos de Computación,5,activo,acreedora,true,true,true,true,true,true,true,true,true
+2,PASIVO,1,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-1,PASIVO CORRIENTE,2,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-1-1,OBLIGACIONES A CORTO PLAZO,3,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-1-1-001,DOCUMENTOS POR PAGAR,4,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-1-1-001-001,Letras por Pagar,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-1-1-001-002,Pagarés por Pagar,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-1-1-002,CUENTAS POR PAGAR COMERCIALES,4,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-1-1-002-001,Proveedores,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-1-1-002-002,Acreedores Varios,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-1-2,OBLIGACIONES FISCALES,3,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-1-2-001,IMPUESTOS POR PAGAR,4,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-1-2-001-001,IVA por Pagar,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-1-2-001-002,IT por Pagar,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-1-2-001-003,IUE por Pagar,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-1-2-001-004,RC-IVA por Pagar,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-1-3,OBLIGACIONES SOCIALES,3,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-1-3-001,SUELDOS Y SALARIOS POR PAGAR,4,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-1-3-001-001,Sueldos por Pagar,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-1-3-002,APORTES POR PAGAR,4,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-1-3-002-001,AFP por Pagar,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-1-3-002-002,Caja de Salud por Pagar,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+2-2,PASIVO NO CORRIENTE,2,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-2-1,OBLIGACIONES A LARGO PLAZO,3,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-2-1-001,PRÉSTAMOS BANCARIOS A LARGO PLAZO,4,pasivo,acreedora,false,true,true,true,true,true,true,true,true
+2-2-1-001-001,Préstamos Bancarios LP,5,pasivo,acreedora,true,true,true,true,true,true,true,true,true
+3,PATRIMONIO,1,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-1,CAPITAL,2,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-1-1,CAPITAL SOCIAL,3,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-1-1-001,CAPITAL SOCIAL,4,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-1-1-001-001,Capital Social,5,patrimonio,acreedora,true,true,true,true,true,true,true,true,true
+3-2,RESERVAS,2,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-2-1,RESERVAS,3,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-2-1-001,RESERVA LEGAL,4,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-2-1-001-001,Reserva Legal,5,patrimonio,acreedora,true,true,true,true,true,true,true,true,true
+3-3,RESULTADOS,2,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-3-1,RESULTADOS ACUMULADOS,3,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-3-1-001,RESULTADOS GESTIONES ANTERIORES,4,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-3-1-001-001,Resultados Acumulados,5,patrimonio,acreedora,true,true,true,true,true,true,true,true,true
+3-3-1-002,RESULTADO DE LA GESTIÓN,4,patrimonio,acreedora,false,true,true,true,true,true,true,true,true
+3-3-1-002-001,Resultado de la Gestión,5,patrimonio,acreedora,true,true,true,true,true,true,true,true,true
+4,INGRESOS,1,ingreso,acreedora,false,true,true,true,true,true,true,true,true
+4-1,INGRESOS OPERACIONALES,2,ingreso,acreedora,false,true,true,true,true,true,true,true,true
+4-1-1,VENTAS,3,ingreso,acreedora,false,true,false,false,true,true,true,true,true
+4-1-1-001,VENTAS,4,ingreso,acreedora,false,true,false,false,true,true,true,true,true
+4-1-1-001-001,Ventas,5,ingreso,acreedora,true,true,false,false,true,true,true,true,true
+4-1-2,INGRESOS POR SERVICIOS,3,ingreso,acreedora,false,false,true,true,false,false,false,false,false
+4-1-2-001,PRESTACIÓN DE SERVICIOS,4,ingreso,acreedora,false,false,true,true,false,false,false,false,false
+4-1-2-001-001,Ingresos por Servicios,5,ingreso,acreedora,true,false,true,true,false,false,false,false,false
+5,GASTOS,1,gasto,deudora,false,true,true,true,true,true,true,true,true
+5-1,COSTO DE VENTAS,2,gasto,deudora,false,true,true,true,true,true,true,true,true
+5-1-1,COSTO DE VENTAS,3,gasto,deudora,false,true,false,false,true,true,true,true,true
+5-1-1-001,COSTO DE VENTAS,4,gasto,deudora,false,true,false,false,true,true,true,true,true
+5-1-1-001-001,Costo de Ventas,5,gasto,deudora,true,true,false,false,true,true,true,true,true
+5-2,GASTOS DE OPERACIÓN,2,gasto,deudora,false,true,true,true,true,true,true,true,true
+5-2-1,GASTOS ADMINISTRATIVOS,3,gasto,deudora,false,true,true,true,true,true,true,true,true
+5-2-1-001,SUELDOS Y SALARIOS,4,gasto,deudora,false,true,true,true,true,true,true,true,true
+5-2-1-001-001,Sueldos y Salarios,5,gasto,deudora,true,true,true,true,true,true,true,true,true
+5-2-1-002,CARGAS SOCIALES,4,gasto,deudora,false,true,true,true,true,true,true,true,true
+5-2-1-002-001,Aportes Patronales AFP,5,gasto,deudora,true,true,true,true,true,true,true,true,true
+5-2-1-002-002,Aportes Patronales Caja Salud,5,gasto,deudora,true,true,true,true,true,true,true,true,true
+5-2-1-003,SERVICIOS BÁSICOS,4,gasto,deudora,false,true,true,true,true,true,true,true,true
+5-2-1-003-001,Energía Eléctrica,5,gasto,deudora,true,true,true,true,true,true,true,true,true
+5-2-1-003-002,Agua,5,gasto,deudora,true,true,true,true,true,true,true,true,true
+5-2-1-003-003,Teléfono e Internet,5,gasto,deudora,true,true,true,true,true,true,true,true,true
+5-2-1-004,ALQUILERES,4,gasto,deudora,false,true,true,true,true,true,true,true,true
+5-2-1-004-001,Alquiler de Oficina,5,gasto,deudora,true,true,true,true,true,true,true,true,true
+5-2-1-005,DEPRECIACIONES,4,gasto,deudora,false,true,true,true,true,true,true,true,true
+5-2-1-005-001,Depreciación Edificios,5,gasto,deudora,true,true,true,true,true,true,true,true,true
+5-2-1-005-002,Depreciación Muebles y Enseres,5,gasto,deudora,true,true,true,true,true,true,true,true,true
+5-2-1-005-003,Depreciación Equipos de Computación,5,gasto,deudora,true,true,true,true,true,true,true,true,true

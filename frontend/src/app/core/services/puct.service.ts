@@ -64,20 +64,23 @@ export class PuctService {
     return this.http.delete(`${environment.apiUrl}/api/contabilidad/cuentas/${id}`);
   }
 
+  importarPUCT(archivo: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', archivo);
+    return this.http.post(`${environment.apiUrl}/api/contabilidad/cuentas/importar`, formData);
+  }
+
   getCuentasFiltradas(): CuentaContable[] {
     let resultado = this.cuentas();
 
-    // Filtrar por nivel
     if (this.filtroNivel()) {
       resultado = resultado.filter(c => c.nivel === this.filtroNivel());
     }
 
-    // Filtrar por tipo
     if (this.filtroTipo()) {
       resultado = resultado.filter(c => c.tipo === this.filtroTipo());
     }
 
-    // Filtrar por búsqueda
     if (this.busqueda()) {
       const search = this.busqueda().toLowerCase();
       resultado = resultado.filter(c => 
@@ -97,14 +100,35 @@ export class PuctService {
     return this.cuentas().filter(c => c.tipo === tipo);
   }
 
+  getCuentasNivel4(): CuentaContable[] {
+    return this.cuentas().filter(c => c.nivel === 4).sort((a, b) => 
+      a.codigo.localeCompare(b.codigo)
+    );
+  }
+
+  obtenerSiguienteCodigoNivel5(codigoPadre: string): string {
+    const cuentasHijas = this.cuentas().filter(c => 
+      c.nivel === 5 && c.codigo.startsWith(codigoPadre + '-')
+    );
+
+    if (cuentasHijas.length === 0) {
+      return `${codigoPadre}-001`;
+    }
+
+    const numeros = cuentasHijas.map(c => {
+      const partes = c.codigo.split('-');
+      return parseInt(partes[partes.length - 1]);
+    });
+
+    const maximo = Math.max(...numeros);
+    const siguiente = (maximo + 1).toString().padStart(3, '0');
+    
+    return `${codigoPadre}-${siguiente}`;
+  }
+
   esEditable(nivel: number, rol: string): boolean {
-    // Nivel 1-3: Cerrado (nadie puede editar)
     if (nivel <= 3) return false;
-    
-    // Nivel 4: Solo ADMINISTRADOR
     if (nivel === 4) return rol === 'ADMINISTRADOR';
-    
-    // Nivel 5: Todos pueden crear
     return nivel === 5;
   }
 }

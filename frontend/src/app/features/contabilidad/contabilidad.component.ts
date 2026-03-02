@@ -14,21 +14,24 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrl: './contabilidad.component.scss'
 })
 export class ContabilidadComponent implements OnInit {
-  // Formulario nueva cuenta
   mostrarFormulario = signal(false);
-  nuevaCuenta = signal({
-    codigo: '',
-    nombre: '',
-    nivel: 5,
-    tipo: 'activo' as const,
-    naturaleza: 'deudora' as const,
-    es_imputable: true
-  });
+  mostrarImportador = signal(false);
+  
+  // Formulario mejorado
+  cuentaPadreSeleccionada = signal<string>('');
+  codigoGenerado = signal<string>('');
+  nombreCuenta = signal<string>('');
+  tipoSeleccionado = signal<'activo' | 'pasivo' | 'patrimonio' | 'ingreso' | 'gasto'>('activo');
+  naturalezaSeleccionada = signal<'deudora' | 'acreedora'>('deudora');
+  esImputable = signal(true);
+
+  archivoSeleccionado = signal<File | null>(null);
+  importando = signal(false);
+  resultadoImportacion = signal<any>(null);
 
   guardando = signal(false);
   mensaje = signal<{tipo: 'success' | 'error', texto: string} | null>(null);
 
-  // Filtros
   filtroNivel = signal<number | null>(null);
   filtroTipo = signal<string | null>(null);
   busqueda = signal('');
@@ -52,6 +55,10 @@ export class ContabilidadComponent implements OnInit {
 
   get empresaActiva() {
     return this.authService.empresaActiva();
+  }
+
+  get cuentasNivel4() {
+    return this.puctService.getCuentasNivel4();
   }
 
   ngOnInit(): void {
@@ -82,33 +89,116 @@ export class ContabilidadComponent implements OnInit {
 
   abrirFormulario(): void {
     this.mostrarFormulario.set(true);
+    this.limpiarFormulario();
   }
 
   cerrarFormulario(): void {
     this.mostrarFormulario.set(false);
-    this.nuevaCuenta.set({
-      codigo: '',
-      nombre: '',
-      nivel: 5,
-      tipo: 'activo',
-      naturaleza: 'deudora',
-      es_imputable: true
+    this.limpiarFormulario();
+  }
+
+  limpiarFormulario(): void {
+    this.cuentaPadreSeleccionada.set('');
+    this.codigoGenerado.set('');
+    this.nombreCuenta.set('');
+    this.tipoSeleccionado.set('activo');
+    this.naturalezaSeleccionada.set('deudora');
+    this.esImputable.set(true);
+  }
+
+  onCuentaPadreChange(codigoPadre: string): void {
+    if (!codigoPadre) {
+      this.codigoGenerado.set('');
+      return;
+    }
+
+    // Generar código automáticamente
+    const siguienteCodigo = this.puctService.obtenerSiguienteCodigoNivel5(codigoPadre);
+    this.codigoGenerado.set(siguienteCodigo);
+
+    // Obtener info de la cuenta padre para sugerir tipo y naturaleza
+    const cuentaPadre = this.puctService.cuentas().find(c => c.codigo === codigoPadre);
+    if (cuentaPadre) {
+      this.tipoSeleccionado.set(cuentaPadre.tipo);
+      this.naturalezaSeleccionada.set(cuentaPadre.naturaleza);
+    }
+  }
+
+  abrirImportador(): void {
+    this.mostrarImportador.set(true);
+    this.resultadoImportacion.set(null);
+  }
+
+  cerrarImportador(): void {
+    this.mostrarImportador.set(false);
+    this.archivoSeleccionado.set(null);
+    this.resultadoImportacion.set(null);
+  }
+
+  onArchivoSeleccionado(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.archivoSeleccionado.set(input.files[0]);
+    }
+  }
+
+  importarPUCT(): void {
+    const archivo = this.archivoSeleccionado();
+    
+    if (!archivo) {
+      this.mostrarMensaje('error', 'Seleccione un archivo CSV');
+      return;
+    }
+
+    this.importando.set(true);
+
+    this.puctService.importarPUCT(archivo).subscribe({
+      next: (response) => {
+        console.log('Importación exitosa:', response);
+        this.resultadoImportacion.set(response.data);
+        this.mostrarMensaje('success', `${response.data.importadas} cuentas importadas correctamente`);
+        this.cargarCuentas();
+        this.importando.set(false);
+      },
+      error: (err) => {
+        console.error('Error en importación:', err);
+        this.mostrarMensaje('error', err.error?.message || 'Error al importar archivo');
+        this.importando.set(false);
+      }
     });
   }
 
+  descargarPlantilla(): void {
+    const csvContent = `codigo,nombre,nivel,tipo,naturaleza,es_imputable,aplica_comercial,aplica_servicios,aplica_transporte,aplica_industrial,aplica_petrolera,aplica_construccion,aplica_agropecuaria,aplica_minera
+1-1-1-001-001,Caja Moneda Nacional,5,activo,deudora,true,true,true,true,true,true,true,true,true
+5-2-1-001-001,Sueldos y Salarios,5,gasto,deudora,true,true,true,true,true,true,true,true,true`;
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'plantilla-puct.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
   crearCuenta(): void {
-    const cuenta = this.nuevaCuenta();
+    const codigo = this.codigoGenerado();
+    const nombre = this.nombreCuenta();
 
-    if (!cuenta.codigo || !cuenta.nombre) {
-      this.mostrarMensaje('error', 'Código y nombre son obligatorios');
+    if (!codigo || !nombre) {
+      this.mostrarMensaje('error', 'Seleccione una cuenta padre e ingrese el nombre');
       return;
     }
 
-    // Validar código según nivel
-    if (!this.validarCodigo(cuenta.codigo, cuenta.nivel)) {
-      this.mostrarMensaje('error', `Código inválido para nivel ${cuenta.nivel}`);
-      return;
-    }
+    const cuenta = {
+      codigo,
+      nombre,
+      nivel: 5,
+      tipo: this.tipoSeleccionado(),
+      naturaleza: this.naturalezaSeleccionada(),
+      es_imputable: this.esImputable()
+    };
 
     this.guardando.set(true);
 
@@ -125,25 +215,6 @@ export class ContabilidadComponent implements OnInit {
         this.guardando.set(false);
       }
     });
-  }
-
-  validarCodigo(codigo: string, nivel: number): boolean {
-    // Nivel 1: 1 dígito (1-5)
-    if (nivel === 1) return /^[1-5]$/.test(codigo);
-    
-    // Nivel 2: 1-1 (2 dígitos)
-    if (nivel === 2) return /^\d-\d$/.test(codigo);
-    
-    // Nivel 3: 1-1-1 (3 dígitos)
-    if (nivel === 3) return /^\d-\d-\d$/.test(codigo);
-    
-    // Nivel 4: 1-1-1-001 (6 dígitos)
-    if (nivel === 4) return /^\d-\d-\d-\d{3}$/.test(codigo);
-    
-    // Nivel 5: 1-1-1-001-001 (9 dígitos)
-    if (nivel === 5) return /^\d-\d-\d-\d{3}-\d{3}$/.test(codigo);
-    
-    return false;
   }
 
   mostrarMensaje(tipo: 'success' | 'error', texto: string): void {
