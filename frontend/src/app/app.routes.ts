@@ -22,6 +22,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'comprobantes',
+    loadChildren: () => import('./features/comprobantes/comprobantes.routes').then(m => m.routes),
+    canActivate: [authGuard]
+  },
+  {
     path: '',
     redirectTo: '/dashboard',
     pathMatch: 'full'

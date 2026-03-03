@@ -1,0 +1,286 @@
+<div class="comprobantes-layout">
+  <app-header />
+
+  <div class="comprobantes-container">
+    <app-sidebar />
+
+    <main class="comprobantes-content">
+      <div class="comprobantes-header">
+        <div class="header-left">
+          <h1>📝 Comprobantes Contables</h1>
+          <p>Registro de asientos contables</p>
+        </div>
+        <div class="header-right">
+          <button class="btn-primary" (click)="abrirFormulario()">
+            ➕ Nuevo Comprobante
+          </button>
+        </div>
+      </div>
+
+      <!-- Mensaje -->
+      @if (mensaje()) {
+        <div class="mensaje" [class.success]="mensaje()?.tipo === 'success'" [class.error]="mensaje()?.tipo === 'error'">
+          {{ mensaje()?.texto }}
+        </div>
+      }
+
+      <!-- Loading -->
+      @if (cargando) {
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Cargando comprobantes...</p>
+        </div>
+      }
+
+      <!-- Lista de comprobantes -->
+      @if (!cargando) {
+        <div class="comprobantes-list">
+          @if (comprobantes.length === 0) {
+            <div class="empty-state">
+              <span class="empty-icon">📝</span>
+              <h3>No hay comprobantes registrados</h3>
+              <p>Comienza creando tu primer comprobante contable</p>
+            </div>
+          } @else {
+            @for (comp of comprobantes; track comp.id) {
+              <div class="comprobante-card">
+                <div class="card-header">
+                  <div class="card-info">
+                    <span class="card-icono">{{ getIconoTipo(comp.tipo) }}</span>
+                    <div>
+                      <h3>{{ comp.numero }}</h3>
+                      <span class="card-tipo" [style.color]="getColorTipo(comp.tipo)">
+                        {{ comp.tipo | uppercase }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="card-fecha">
+                    {{ comp.fecha | date:'dd/MM/yyyy' }}
+                  </div>
+                </div>
+                <div class="card-body">
+                  <p class="card-glosa">{{ comp.glosa_general }}</p>
+                  <div class="card-totales">
+                    <div class="total-item debe">
+                      <span class="label">Debe:</span>
+                      <span class="value">{{ formatoMoneda(comp.total_debe) }}</span>
+                    </div>
+                    <div class="total-item haber">
+                      <span class="label">Haber:</span>
+                      <span class="value">{{ formatoMoneda(comp.total_haber) }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-footer">
+                  <span class="badge-estado" [class.validado]="comp.estado === 'validado'" [class.anulado]="comp.estado === 'anulado'">
+                    {{ comp.estado }}
+                  </span>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+    </main>
+  </div>
+</div>
+
+<!-- Modal Nuevo Comprobante -->
+@if (mostrarFormulario()) {
+  <div class="modal-overlay" (click)="cerrarFormulario()">
+    <div class="modal-content modal-comprobante" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>➕ Nuevo Comprobante</h2>
+        <button class="btn-close" (click)="cerrarFormulario()">✕</button>
+      </div>
+
+      <form (submit)="$event.preventDefault(); crearComprobante()">
+        <div class="form-body">
+
+          <!-- Encabezado del comprobante -->
+          <div class="comprobante-encabezado">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tipo *</label>
+                <select [(ngModel)]="tipoComprobante" (change)="onTipoChange()" name="tipo">
+                  <option value="ingreso">💰 Ingreso</option>
+                  <option value="egreso">💸 Egreso</option>
+                  <option value="traspaso">🔄 Traspaso</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Número</label>
+                <input type="text" [(ngModel)]="numeroComprobante" name="numero" readonly />
+              </div>
+
+              <div class="form-group">
+                <label>Fecha *</label>
+                <input type="date" [(ngModel)]="fechaComprobante" name="fecha" required />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Glosa General *</label>
+              <input
+                type="text"
+                [(ngModel)]="glosaGeneral"
+                name="glosaGeneral"
+                placeholder="Descripción del comprobante"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Agregar detalle -->
+          <div class="detalle-form">
+            <div class="form-row-compact">
+              <!-- Cuenta con búsqueda -->
+              <div class="form-group flex-3">
+                <label>Cuenta *</label>
+                <div class="cuenta-input-group">
+                  <input
+                    type="text"
+                    [(ngModel)]="busquedaCuenta"
+                    (input)="filtrarCuentas(); seleccionarCuentaDesdeBusqueda()"
+                    placeholder="Buscar cuenta..."
+                    list="cuentas-list"
+                    name="busquedaCuenta"
+                  />
+                  <datalist id="cuentas-list">
+                    @for (cuenta of cuentasFiltradas; track cuenta.id) {
+                      <option [value]="cuenta.codigo + ' - ' + cuenta.nombre">
+                    }
+                  </datalist>
+                </div>
+              </div>
+
+              <!-- Botón agregar cuenta -->
+              <div class="form-group flex-btn">
+                <label>&nbsp;</label>
+                <button type="button" class="btn-add-cuenta" title="Agregar nueva cuenta">
+                  ➕
+                </button>
+              </div>
+
+              <!-- Tipo de cuenta -->
+              <div class="form-group flex-1">
+                <label>Tipo</label>
+                <select [(ngModel)]="tipoCuentaSeleccionada" name="tipoCta" class="select-compact" disabled>
+                  <option value="A" title="Activo">A</option>
+                  <option value="P" title="Pasivo">P</option>
+                  <option value="C" title="Capital">C</option>
+                  <option value="I" title="Ingreso">I</option>
+                  <option value="G" title="Gasto">G</option>
+                </select>
+              </div>
+
+              <!-- Debe/Haber -->
+              <div class="form-group flex-1">
+                <label>D/H</label>
+                <select [(ngModel)]="tipoMovimiento" name="tipoMov" class="select-compact">
+                  <option value="debe">D</option>
+                  <option value="haber">H</option>
+                </select>
+              </div>
+
+              <!-- Monto -->
+              <div class="form-group flex-2">
+                <label>Monto *</label>
+                <input
+                  type="number"
+                  [(ngModel)]="montoDetalle"
+                  name="monto"
+                  step="0.01"
+                  min="0"
+                  class="input-compact"
+                />
+              </div>
+            </div>
+
+            <button type="button" class="btn-agregar" (click)="agregarDetalle()">
+              ➕ Agregar Movimiento
+            </button>
+          </div>
+
+          <!-- Lista de detalles -->
+          @if (detalles().length > 0) {
+            <div class="detalles-list">
+              <h3>Movimientos</h3>
+
+              <table class="tabla-detalles">
+                <thead>
+                  <tr>
+                    <th>Cuenta</th>
+                    <th class="text-right">Debe</th>
+                    <th class="text-right">Haber</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (detalle of detalles(); track $index) {
+                    <tr>
+                      <td>
+                        <div class="cuenta-info">
+                          <code>{{ detalle.cuenta_codigo }}</code>
+                          <span>{{ detalle.cuenta_nombre }}</span>
+                        </div>
+                      </td>
+
+                      <td class="text-right debe">{{ formatoMoneda(detalle.debe) }}</td>
+                      <td class="text-right haber">{{ formatoMoneda(detalle.haber) }}</td>
+                      <td class="text-center">
+                        <button type="button" class="btn-eliminar" (click)="eliminarDetalle($index)">
+                          🗑️
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr class="totales">
+                    <td colspan="2"><strong>TOTALES:</strong></td>
+                    <td class="text-right debe"><strong>{{ formatoMoneda(balance.debe) }}</strong></td>
+                    <td class="text-right haber"><strong>{{ formatoMoneda(balance.haber) }}</strong></td>
+                    <td></td>
+                  </tr>
+                  @if (!balance.valido) {
+                    <tr class="diferencia">
+                      <td colspan="5" class="text-center error">
+                        ⚠️ Diferencia: {{ formatoMoneda(balance.diferencia) }}
+                      </td>
+                    </tr>
+                  } @else {
+                    <tr class="balanceado">
+                      <td colspan="5" class="text-center success">
+                        ✓ Comprobante balanceado
+                      </td>
+                    </tr>
+                  }
+                </tfoot>
+              </table>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="cerrarFormulario()" [disabled]="guardando()">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="!puedeGuardar || guardando()"
+          >
+            @if (guardando()) {
+              <span class="spinner-small"></span>
+              Guardando...
+            } @else {
+              ✓ Guardar Comprobante
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

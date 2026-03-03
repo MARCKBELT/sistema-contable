@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const multer = require('multer');
+const csv = require('csv-parser');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -22,7 +25,6 @@ app.get('/health', (req, res) => {
 
 // ==================== CONFIGURACIÓN ====================
 
-// Obtener todos los parámetros
 app.get('/api/config/parametros', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -44,7 +46,6 @@ app.get('/api/config/parametros', async (req, res) => {
   }
 });
 
-// Actualizar parámetro
 app.put('/api/config/parametros/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -81,7 +82,6 @@ app.put('/api/config/parametros/:id', async (req, res) => {
 
 // ==================== PUCT ====================
 
-// Obtener todas las cuentas de la empresa
 app.get('/api/contabilidad/cuentas', async (req, res) => {
   try {
     const empresaId = req.headers['x-empresa-id'];
@@ -114,7 +114,6 @@ app.get('/api/contabilidad/cuentas', async (req, res) => {
   }
 });
 
-// Crear nueva cuenta
 app.post('/api/contabilidad/cuentas', async (req, res) => {
   try {
     const empresaId = req.headers['x-empresa-id'];
@@ -127,7 +126,6 @@ app.post('/api/contabilidad/cuentas', async (req, res) => {
       });
     }
 
-    // Verificar que no exista la cuenta
     const existe = await pool.query(
       'SELECT id FROM contabilidad.cuentas_contables WHERE empresa_id = $1 AND codigo = $2',
       [empresaId, codigo]
@@ -162,7 +160,6 @@ app.post('/api/contabilidad/cuentas', async (req, res) => {
   }
 });
 
-// Actualizar cuenta
 app.put('/api/contabilidad/cuentas/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -198,13 +195,11 @@ app.put('/api/contabilidad/cuentas/:id', async (req, res) => {
   }
 });
 
-// Eliminar cuenta
 app.delete('/api/contabilidad/cuentas/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const empresaId = req.headers['x-empresa-id'];
 
-    // Verificar que no tenga movimientos
     const tieneMovimientos = await pool.query(`
       SELECT COUNT(*) as total 
       FROM contabilidad.detalle_comprobantes 
@@ -244,19 +239,10 @@ app.delete('/api/contabilidad/cuentas/:id', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`📊 Contabilidad Service corriendo en puerto ${PORT}`);
-});
-
 // ==================== IMPORTACIÓN PUCT ====================
-
-const multer = require('multer');
-const csv = require('csv-parser');
-const fs = require('fs');
 
 const upload = multer({ dest: '/tmp/' });
 
-// Importar PUCT desde CSV
 app.post('/api/contabilidad/cuentas/importar', upload.single('file'), async (req, res) => {
   try {
     const empresaId = req.headers['x-empresa-id'];
@@ -280,7 +266,6 @@ app.post('/api/contabilidad/cuentas/importar', upload.single('file'), async (req
     let importadas = 0;
     let duplicadas = 0;
 
-    // Leer CSV
     await new Promise((resolve, reject) => {
       fs.createReadStream(req.file.path)
         .pipe(csv())
@@ -291,10 +276,8 @@ app.post('/api/contabilidad/cuentas/importar', upload.single('file'), async (req
         .on('error', reject);
     });
 
-    // Insertar cuentas
     for (const cuenta of cuentas) {
       try {
-        // Verificar si ya existe
         const existe = await pool.query(
           'SELECT id FROM contabilidad.cuentas_contables WHERE empresa_id = $1 AND codigo = $2',
           [empresaId, cuenta.codigo]
@@ -305,7 +288,6 @@ app.post('/api/contabilidad/cuentas/importar', upload.single('file'), async (req
           continue;
         }
 
-        // Insertar cuenta
         await pool.query(`
           INSERT INTO contabilidad.cuentas_contables 
           (empresa_id, codigo, nombre, nivel, tipo, naturaleza, es_imputable,
@@ -336,7 +318,6 @@ app.post('/api/contabilidad/cuentas/importar', upload.single('file'), async (req
       }
     }
 
-    // Eliminar archivo temporal
     fs.unlinkSync(req.file.path);
 
     res.json({
@@ -348,7 +329,7 @@ app.post('/api/contabilidad/cuentas/importar', upload.single('file'), async (req
         duplicadas,
         errores: errores.length
       },
-      errores: errores.slice(0, 10) // Solo primeros 10 errores
+      errores: errores.slice(0, 10)
     });
 
   } catch (error) {
@@ -359,4 +340,170 @@ app.post('/api/contabilidad/cuentas/importar', upload.single('file'), async (req
       error: error.message
     });
   }
+});
+
+// ==================== COMPROBANTES ====================
+
+// Obtener todos los comprobantes
+app.get('/api/contabilidad/comprobantes', async (req, res) => {
+  try {
+    const empresaId = req.headers['x-empresa-id'];
+    
+    if (!empresaId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de empresa no proporcionado'
+      });
+    }
+
+    const result = await pool.query(`
+      SELECT 
+        id,
+        (prefijo || '-' || LPAD(numero::text, 5, '0')) as numero,
+        tipo,
+        fecha,
+        glosa,
+        total_debe,
+        total_haber,
+        CASE 
+          WHEN anulado = true THEN 'anulado'
+          ELSE 'validado'
+        END as estado,
+        created_at
+      FROM contabilidad.comprobantes 
+      WHERE empresa_id = $1
+      ORDER BY fecha DESC, numero DESC
+    `, [empresaId]);
+
+    res.json({
+      success: true,
+      data: result.rows.map(row => ({
+        ...row,
+        glosa_general: row.glosa // Mapear para el frontend
+      }))
+    });
+  } catch (error) {
+    console.error('Error al obtener comprobantes:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener comprobantes',
+      error: error.message
+    });
+  }
+});
+
+// Obtener siguiente número
+app.get('/api/contabilidad/comprobantes/siguiente-numero/:tipo', async (req, res) => {
+  try {
+    const empresaId = req.headers['x-empresa-id'];
+    const { tipo } = req.params;
+
+    const tipoUpper = tipo.toUpperCase();
+    const prefijo = tipoUpper.substring(0, 3);
+
+    const result = await pool.query(`
+      SELECT numero FROM contabilidad.comprobantes 
+      WHERE empresa_id = $1 AND tipo = $2
+      ORDER BY numero DESC 
+      LIMIT 1
+    `, [empresaId, tipoUpper]);
+
+    let siguienteNumero;
+    if (result.rows.length === 0) {
+      siguienteNumero = `${prefijo}-00001`;
+    } else {
+      const ultimoNumero = result.rows[0].numero;
+      const siguiente = ultimoNumero + 1;
+      siguienteNumero = `${prefijo}-${String(siguiente).padStart(5, '0')}`;
+    }
+
+    res.json({
+      success: true,
+      data: { numero: siguienteNumero }
+    });
+  } catch (error) {
+    console.error('Error al obtener siguiente número:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener siguiente número',
+      error: error.message
+    });
+  }
+});
+
+// Crear comprobante
+app.post('/api/contabilidad/comprobantes', async (req, res) => {
+  const client = await pool.connect();
+  
+  try {
+    const empresaId = req.headers['x-empresa-id'];
+    const { numero, tipo, fecha, glosa_general: glosa, detalles } = req.body;
+
+    if (!empresaId) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de empresa no proporcionado'
+      });
+    }
+
+    // Separar prefijo y número
+    const partes = numero.split('-');
+    const prefijo = partes[0];
+    const numeroInt = parseInt(partes[1]);
+
+    // Validar balance
+    const totalDebe = detalles.reduce((sum, d) => sum + parseFloat(d.debe || 0), 0);
+    const totalHaber = detalles.reduce((sum, d) => sum + parseFloat(d.haber || 0), 0);
+
+    if (Math.abs(totalDebe - totalHaber) > 0.01) {
+      return res.status(400).json({
+        success: false,
+        message: `Comprobante desbalanceado: Debe=${totalDebe}, Haber=${totalHaber}`
+      });
+    }
+
+    await client.query('BEGIN');
+
+    // Insertar comprobante
+    const compResult = await client.query(`
+      INSERT INTO contabilidad.comprobantes 
+      (empresa_id, numero, prefijo, tipo, fecha, glosa, total_debe, total_haber, anulado)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false)
+      RETURNING *
+    `, [empresaId, numeroInt, prefijo, tipo.toUpperCase(), fecha, glosa, totalDebe, totalHaber]);
+
+    const comprobanteId = compResult.rows[0].id;
+
+    // Insertar detalles
+        for (const detalle of detalles) {
+      await client.query(`
+        INSERT INTO contabilidad.detalle_comprobantes 
+        (comprobante_id, cuenta_id, debe, haber)
+        VALUES ($1, $2, $3, $4)
+      `, [comprobanteId, detalle.cuenta_id, detalle.debe || 0, detalle.haber || 0]);
+    }
+
+    await client.query('COMMIT');
+
+    res.status(201).json({
+      success: true,
+      data: compResult.rows[0],
+      message: 'Comprobante creado correctamente'
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error al crear comprobante:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al crear comprobante',
+      error: error.message
+    });
+  } finally {
+    client.release();
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`📊 Contabilidad Service corriendo en puerto ${PORT}`);
 });

@@ -20,7 +20,8 @@ interface MenuItem {
 export class SidebarComponent {
   menuItems: MenuItem[] = [
     { icon: '📊', label: 'Dashboard', route: '/dashboard' },
-    { icon: '📒', label: 'Contabilidad', route: '/contabilidad' },
+    { icon: '📒', label: 'Plan de Cuentas', route: '/contabilidad' },
+    { icon: '📝', label: 'Comprobantes', route: '/comprobantes' },
     { icon: '👥', label: 'Nóminas', route: '/nominas' },
     { icon: '🧾', label: 'Facturación', route: '/facturacion' },
     { icon: '📈', label: 'Reportes', route: '/reportes' },

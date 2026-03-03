@@ -967,7 +967,7 @@
 
 .form-grid-compact {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr; /* 60% - 40% */
   gap: 20px;
 
   .form-group {
@@ -1070,5 +1070,82 @@
     color: rgba(255, 255, 255, 0.7);
     font-size: 13px;
     font-style: italic;
+  }
+}
+
+/* Stack vertical - cada campo en su fila */
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2d3748;
+    }
+
+    input,
+    select {
+      padding: 10px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+
+      &:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      &:disabled {
+        background: #f7fafc;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 12px;
+      background: #f7fafc;
+      border-radius: 8px;
+      transition: all 0.3s;
+
+      &:hover {
+        background: #edf2f7;
+      }
+
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+      }
+
+      span {
+        font-size: 14px;
+        color: #2d3748;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
   }
 }
