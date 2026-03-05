@@ -31,6 +31,11 @@ export class ComprobantesComponent implements OnInit {
   montoDetalle = signal(0);
   tipoMovimiento = signal<'debe' | 'haber'>('debe');
 
+  // Búsqueda de cuentas
+  busquedaCuenta = signal('');
+  cuentasFiltradas = signal<CuentaContable[]>([]);
+  tipoCuentaSeleccionada = signal<'A' | 'P' | 'C' | 'I' | 'G'>('A');
+
   guardando = signal(false);
   mensaje = signal<{tipo: 'success' | 'error', texto: string} | null>(null);
 
@@ -71,7 +76,6 @@ export class ComprobantesComponent implements OnInit {
   ngOnInit(): void {
     this.cargarComprobantes();
     this.cargarCuentas();
-    this.cuentasFiltradas.set(this.cuentasImputables);
   }
 
   cargarComprobantes(): void {
@@ -85,6 +89,9 @@ export class ComprobantesComponent implements OnInit {
 
   cargarCuentas(): void {
     this.puctService.obtenerCuentas().subscribe({
+      next: () => {
+        this.cuentasFiltradas.set(this.cuentasImputables);
+      },
       error: (err) => {
         console.error('Error al cargar cuentas:', err);
       }
@@ -112,6 +119,7 @@ export class ComprobantesComponent implements OnInit {
 
   limpiarDetalle(): void {
     this.cuentaSeleccionada.set('');
+    this.busquedaCuenta.set('');
     this.glosaDetalle.set('');
     this.montoDetalle.set(0);
     this.tipoMovimiento.set('debe');
@@ -130,6 +138,41 @@ export class ComprobantesComponent implements OnInit {
 
   onTipoChange(): void {
     this.obtenerSiguienteNumero();
+  }
+
+  filtrarCuentas(): void {
+    const busqueda = this.busquedaCuenta().toLowerCase();
+    if (!busqueda) {
+      this.cuentasFiltradas.set(this.cuentasImputables);
+      return;
+    }
+
+    const filtradas = this.cuentasImputables.filter(c =>
+      c.codigo.toLowerCase().includes(busqueda) ||
+      c.nombre.toLowerCase().includes(busqueda)
+    );
+    this.cuentasFiltradas.set(filtradas.slice(0, 20));
+  }
+
+  seleccionarCuentaDesdeBusqueda(): void {
+    const texto = this.busquedaCuenta();
+    const partes = texto.split(' - ');
+    if (partes.length < 2) return;
+    
+    const codigo = partes[0];
+    const cuenta = this.cuentasImputables.find(c => c.codigo === codigo);
+    
+    if (cuenta) {
+      this.cuentaSeleccionada.set(cuenta.id);
+      
+      switch(cuenta.tipo) {
+        case 'activo': this.tipoCuentaSeleccionada.set('A'); break;
+        case 'pasivo': this.tipoCuentaSeleccionada.set('P'); break;
+        case 'patrimonio': this.tipoCuentaSeleccionada.set('C'); break;
+        case 'ingreso': this.tipoCuentaSeleccionada.set('I'); break;
+        case 'gasto': this.tipoCuentaSeleccionada.set('G'); break;
+      }
+    }
   }
 
   agregarDetalle(): void {
@@ -226,79 +269,3 @@ export class ComprobantesComponent implements OnInit {
     }).format(valor);
   }
 }
-
-  // Nuevas propiedades para búsqueda de cuentas
-  busquedaCuenta = signal('');
-  cuentasFiltradas = signal<CuentaContable[]>([]);
-  tipoCuentaSeleccionada = signal<'A' | 'P' | 'C' | 'I' | 'G'>('A');
-
-  filtrarCuentas(): void {
-    const busqueda = this.busquedaCuenta().toLowerCase();
-    if (!busqueda) {
-      this.cuentasFiltradas.set(this.cuentasImputables);
-      return;
-    }
-
-    const filtradas = this.cuentasImputables.filter(c =>
-      c.codigo.toLowerCase().includes(busqueda) ||
-      c.nombre.toLowerCase().includes(busqueda)
-    );
-    this.cuentasFiltradas.set(filtradas);
-  }
-
-  seleccionarCuentaDesdeBusqueda(): void {
-    const texto = this.busquedaCuenta();
-    const codigo = texto.split(' - ')[0];
-    const cuenta = this.cuentasImputables.find(c => c.codigo === codigo);
-
-    if (cuenta) {
-      this.cuentaSeleccionada.set(cuenta.id);
-
-      // Detectar tipo automáticamente
-      switch(cuenta.tipo) {
-        case 'activo': this.tipoCuentaSeleccionada.set('A'); break;
-        case 'pasivo': this.tipoCuentaSeleccionada.set('P'); break;
-        case 'patrimonio': this.tipoCuentaSeleccionada.set('C'); break;
-        case 'ingreso': this.tipoCuentaSeleccionada.set('I'); break;
-        case 'gasto': this.tipoCuentaSeleccionada.set('G'); break;
-      }
-    }
-  }
-
-  // Nuevas propiedades para búsqueda de cuentas
-  busquedaCuenta = signal('');
-  cuentasFiltradas = signal<CuentaContable[]>([]);
-  tipoCuentaSeleccionada = signal<'A' | 'P' | 'C' | 'I' | 'G'>('A');
-
-  filtrarCuentas(): void {
-    const busqueda = this.busquedaCuenta().toLowerCase();
-    if (!busqueda) {
-      this.cuentasFiltradas.set(this.cuentasImputables);
-      return;
-    }
-
-    const filtradas = this.cuentasImputables.filter(c =>
-      c.codigo.toLowerCase().includes(busqueda) ||
-      c.nombre.toLowerCase().includes(busqueda)
-    );
-    this.cuentasFiltradas.set(filtradas);
-  }
-
-  seleccionarCuentaDesdeBusqueda(): void {
-    const texto = this.busquedaCuenta();
-    const codigo = texto.split(' - ')[0];
-    const cuenta = this.cuentasImputables.find(c => c.codigo === codigo);
-
-    if (cuenta) {
-      this.cuentaSeleccionada.set(cuenta.id);
-
-      // Detectar tipo automáticamente
-      switch(cuenta.tipo) {
-        case 'activo': this.tipoCuentaSeleccionada.set('A'); break;
-        case 'pasivo': this.tipoCuentaSeleccionada.set('P'); break;
-        case 'patrimonio': this.tipoCuentaSeleccionada.set('C'); break;
-        case 'ingreso': this.tipoCuentaSeleccionada.set('I'); break;
-        case 'gasto': this.tipoCuentaSeleccionada.set('G'); break;
-      }
-    }
-  }

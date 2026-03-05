@@ -148,7 +148,7 @@
                     name="busquedaCuenta"
                   />
                   <datalist id="cuentas-list">
-                    @for (cuenta of cuentasFiltradas; track cuenta.id) {
+                    @for (cuenta of cuentasFiltradas(); track cuenta.id) {
                       <option [value]="cuenta.codigo + ' - ' + cuenta.nombre">
                     }
                   </datalist>
@@ -157,7 +157,8 @@
 
               <!-- Botón agregar cuenta -->
               <div class="form-group flex-btn">
-                <label>&nbsp;</label>
+                <label></label>
+                <label>&nbsp;+ Cuenta</label>
                 <button type="button" class="btn-add-cuenta" title="Agregar nueva cuenta">
                   ➕
                 </button>
@@ -177,15 +178,15 @@
 
               <!-- Debe/Haber -->
               <div class="form-group flex-1">
-                <label>D/H</label>
+                <label>Debe/Haber</label>
                 <select [(ngModel)]="tipoMovimiento" name="tipoMov" class="select-compact">
-                  <option value="debe">D</option>
-                  <option value="haber">H</option>
+                  <option value="debe">DEBE</option>
+                  <option value="haber">HABER</option>
                 </select>
               </div>
 
               <!-- Monto -->
-              <div class="form-group flex-2">
+              <div class="form-group flex-1">
                 <label>Monto *</label>
                 <input
                   type="number"

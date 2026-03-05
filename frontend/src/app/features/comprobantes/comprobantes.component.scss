@@ -650,7 +650,7 @@
 .agregar-detalle {
   padding: 12px !important; /* Reducido de 20px */
   margin-bottom: 16px !important; /* Reducido de 24px */
-  
+
   h3 {
     margin: 0 0 12px 0 !important; /* Reducido de 16px */
   }
@@ -717,7 +717,7 @@
 .agregar-detalle {
   padding: 10px !important; /* Reducido de 12px */
   margin-bottom: 12px !important;
-  
+
   h3 {
     font-size: 15px !important; /* Reducido de 16px */
     margin: 0 0 10px 0 !important;
@@ -804,4 +804,110 @@
 /* Reducir más la altura máxima del modal completo */
 .modal-comprobante {
   max-height: 70vh !important; /* Reducido de 75vh */
+}
+
+/* Formulario compacto en una fila */
+.form-row-compact {
+  display: grid;
+  grid-template-columns: 3fr 0.5fr 0.7fr 0.7fr 1.3fr;
+  gap: 8px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.cuenta-input-group {
+  width: 100%;
+
+  input {
+    width: 100%;
+  }
+}
+
+.btn-add-cuenta {
+  width: 100%;
+  min-height: 38px;
+  background: #48bb78;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  padding: 0;
+
+  &:hover {
+    background: #38a169;
+    transform: scale(1.05);
+  }
+}
+
+.select-compact,
+.input-compact {
+  padding: 8px 6px !important;
+  font-size: 13px !important;
+  text-align: center;
+  font-weight: 600;
+}
+//*
+/* Estilo mejorado para el botón Agregar Movimiento */
+/*
+// revizar marco beltran
+.agregar-detalle .btn-agregar {
+  width: 100%;
+  padding: 10px 16px !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.3s !important;
+  margin-top: 10px !important;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5) !important;
+  }
+
+  &:active {
+    transform: translateY(0) !important;
+  }
+}
+*/
+
+
+/* Forzar estilo del botón Agregar Movimiento */
+button.btn-agregar {
+  width: 100% !important;
+  padding: 12px 20px !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  margin-top: 12px !important;
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.4) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+
+  &:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%) !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+  }
+
+  &:active {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4) !important;
+  }
 }

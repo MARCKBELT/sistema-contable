@@ -1,0 +1,342 @@
+<div class="reportes-layout">
+  <app-header />
+  
+  <div class="reportes-container">
+    <app-sidebar />
+    
+    <main class="reportes-content">
+      <div class="reportes-header">
+        <div class="header-left">
+          <h1>📈 Reportes Contables</h1>
+          <p>Generación de reportes oficiales para {{ empresaActiva?.razon_social }}</p>
+        </div>
+        <div class="header-right">
+          <button class="btn-secondary" (click)="exportarExcel()">
+            📊 Excel
+          </button>
+          <button class="btn-primary" (click)="exportarPDF()">
+            📄 PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Mensaje -->
+      @if (mensaje()) {
+        <div class="mensaje" [class.success]="mensaje()?.tipo === 'success'" [class.error]="mensaje()?.tipo === 'error'">
+          {{ mensaje()?.texto }}
+        </div>
+      }
+
+      <!-- Filtros -->
+      <div class="filtros-card">
+        <div class="filtros-grid">
+          <div class="filtro-item">
+            <label>📋 Tipo de Reporte</label>
+            <select [(ngModel)]="tipoReporte" (change)="onTipoReporteChange()">
+              <option value="diario">Libro Diario</option>
+              <option value="mayor">Libro Mayor</option>
+              <option value="balance">Balance General</option>
+              <option value="resultados">Estado de Resultados</option>
+            </select>
+          </div>
+
+          <div class="filtro-item">
+            <label>📅 Fecha Inicio</label>
+            <input type="date" [(ngModel)]="fechaInicio" (change)="generarReporte()" />
+          </div>
+
+          <div class="filtro-item">
+            <label>📅 Fecha Fin</label>
+            <input type="date" [(ngModel)]="fechaFin" (change)="generarReporte()" />
+          </div>
+
+          <div class="filtro-item">
+            <button class="btn-generar" (click)="generarReporte()">
+              🔄 Actualizar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      @if (cargando()) {
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Generando reporte...</p>
+        </div>
+      }
+
+      <!-- Libro Diario -->
+      @if (!cargando() && tipoReporte() === 'diario') {
+        <div class="reporte-card">
+          <div class="reporte-header">
+            <h2>📖 Libro Diario</h2>
+            <span class="periodo">Del {{ fechaInicio() | date:'dd/MM/yyyy' }} al {{ fechaFin() | date:'dd/MM/yyyy' }}</span>
+          </div>
+
+          @if (libroDiario().length === 0) {
+            <div class="empty-state">
+              <span class="empty-icon">📋</span>
+              <h3>No hay movimientos en este período</h3>
+              <p>No se encontraron comprobantes contables</p>
+            </div>
+          } @else {
+            <div class="tabla-responsive">
+              <table class="tabla-reporte">
+                <thead>
+                  <tr>
+                    <th>Fecha</th>
+                    <th>Comprobante</th>
+                    <th>Glosa</th>
+                    <th>Cuenta</th>
+                    <th>Debe</th>
+                    <th>Haber</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (mov of libroDiario(); track $index) {
+                    <tr>
+                      <td>{{ mov.fecha | date:'dd/MM/yyyy' }}</td>
+                      <td>
+                        <span class="badge-comprobante">{{ mov.numero_comprobante }}</span>
+                      </td>
+                      <td class="glosa-col">{{ mov.glosa }}</td>
+                      <td>
+                        <div class="cuenta-info">
+                          <code>{{ mov.cuenta_codigo }}</code>
+                          <span>{{ mov.cuenta_nombre }}</span>
+                        </div>
+                      </td>
+                      <td class="debe">{{ formatoMoneda(mov.debe) }}</td>
+                      <td class="haber">{{ formatoMoneda(mov.haber) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Libro Mayor -->
+      @if (!cargando() && tipoReporte() === 'mayor') {
+        <div class="reporte-card">
+          <div class="reporte-header">
+            <h2>📚 Libro Mayor</h2>
+            <span class="periodo">Del {{ fechaInicio() | date:'dd/MM/yyyy' }} al {{ fechaFin() | date:'dd/MM/yyyy' }}</span>
+          </div>
+
+          @if (libroMayor().length === 0) {
+            <div class="empty-state">
+              <span class="empty-icon">📋</span>
+              <h3>No hay movimientos en este período</h3>
+            </div>
+          } @else {
+            @for (cuenta of libroMayor(); track cuenta.cuenta_codigo) {
+              <div class="cuenta-mayor">
+                <div class="cuenta-mayor-header">
+                  <h3>{{ cuenta.cuenta_codigo }} - {{ cuenta.cuenta_nombre }}</h3>
+                  <span class="saldo-inicial">Saldo Inicial: {{ formatoMoneda(cuenta.saldo_inicial) }}</span>
+                </div>
+
+                <table class="tabla-reporte">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Comprobante</th>
+                      <th>Glosa</th>
+                      <th>Debe</th>
+                      <th>Haber</th>
+                      <th>Saldo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (mov of cuenta.movimientos; track $index) {
+                      <tr>
+                        <td>{{ mov.fecha | date:'dd/MM/yyyy' }}</td>
+                        <td><span class="badge-comprobante">{{ mov.numero_comprobante }}</span></td>
+                        <td class="glosa-col">{{ mov.glosa }}</td>
+                        <td class="debe">{{ formatoMoneda(mov.debe) }}</td>
+                        <td class="haber">{{ formatoMoneda(mov.haber) }}</td>
+                        <td class="saldo">{{ formatoMoneda(mov.saldo) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                  <tfoot>
+                    <tr class="totales">
+                      <td colspan="3"><strong>TOTALES</strong></td>
+                      <td class="debe"><strong>{{ formatoMoneda(cuenta.total_debe) }}</strong></td>
+                      <td class="haber"><strong>{{ formatoMoneda(cuenta.total_haber) }}</strong></td>
+                      <td class="saldo"><strong>{{ formatoMoneda(cuenta.saldo_final) }}</strong></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            }
+          }
+        </div>
+      }
+
+      <!-- Balance General -->
+      @if (!cargando() && tipoReporte() === 'balance' && balanceGeneral()) {
+        <div class="reporte-card">
+          <div class="reporte-header">
+            <h2>⚖️ Balance General</h2>
+            <span class="periodo">Al {{ fechaFin() | date:'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="balance-grid">
+            <!-- Activos -->
+            <div class="balance-section">
+              <h3 class="section-title activo">ACTIVOS</h3>
+              
+              <div class="subsection">
+                <h4>Activo Corriente</h4>
+                @for (cuenta of balanceGeneral()!.activos.corriente; track cuenta.codigo) {
+                  <div class="cuenta-balance">
+                    <span class="cuenta-nombre">{{ cuenta.codigo }} - {{ cuenta.nombre }}</span>
+                    <span class="cuenta-saldo">{{ formatoMoneda(cuenta.saldo) }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="subsection">
+                <h4>Activo No Corriente</h4>
+                @for (cuenta of balanceGeneral()!.activos.no_corriente; track cuenta.codigo) {
+                  <div class="cuenta-balance">
+                    <span class="cuenta-nombre">{{ cuenta.codigo }} - {{ cuenta.nombre }}</span>
+                    <span class="cuenta-saldo">{{ formatoMoneda(cuenta.saldo) }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="total-section">
+                <strong>TOTAL ACTIVOS</strong>
+                <strong>{{ formatoMoneda(balanceGeneral()!.activos.total) }}</strong>
+              </div>
+            </div>
+
+            <!-- Pasivos y Patrimonio -->
+            <div class="balance-section">
+              <h3 class="section-title pasivo">PASIVOS</h3>
+              
+              <div class="subsection">
+                <h4>Pasivo Corriente</h4>
+                @for (cuenta of balanceGeneral()!.pasivos.corriente; track cuenta.codigo) {
+                  <div class="cuenta-balance">
+                    <span class="cuenta-nombre">{{ cuenta.codigo }} - {{ cuenta.nombre }}</span>
+                    <span class="cuenta-saldo">{{ formatoMoneda(cuenta.saldo) }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="subsection">
+                <h4>Pasivo No Corriente</h4>
+                @for (cuenta of balanceGeneral()!.pasivos.no_corriente; track cuenta.codigo) {
+                  <div class="cuenta-balance">
+                    <span class="cuenta-nombre">{{ cuenta.codigo }} - {{ cuenta.nombre }}</span>
+                    <span class="cuenta-saldo">{{ formatoMoneda(cuenta.saldo) }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="total-section">
+                <strong>TOTAL PASIVOS</strong>
+                <strong>{{ formatoMoneda(balanceGeneral()!.pasivos.total) }}</strong>
+              </div>
+
+              <h3 class="section-title patrimonio">PATRIMONIO</h3>
+              
+              <div class="subsection">
+                @for (cuenta of balanceGeneral()!.patrimonio.cuentas; track cuenta.codigo) {
+                  <div class="cuenta-balance">
+                    <span class="cuenta-nombre">{{ cuenta.codigo }} - {{ cuenta.nombre }}</span>
+                    <span class="cuenta-saldo">{{ formatoMoneda(cuenta.saldo) }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="total-section">
+                <strong>TOTAL PATRIMONIO</strong>
+                <strong>{{ formatoMoneda(balanceGeneral()!.patrimonio.total) }}</strong>
+              </div>
+
+              <div class="total-general">
+                <strong>TOTAL PASIVO + PATRIMONIO</strong>
+                <strong>{{ formatoMoneda(balanceGeneral()!.pasivos.total + balanceGeneral()!.patrimonio.total) }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Estado de Resultados -->
+      @if (!cargando() && tipoReporte() === 'resultados' && estadoResultados()) {
+        <div class="reporte-card">
+          <div class="reporte-header">
+            <h2>💰 Estado de Resultados</h2>
+            <span class="periodo">Del {{ fechaInicio() | date:'dd/MM/yyyy' }} al {{ fechaFin() | date:'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="estado-resultados">
+            <!-- Ingresos -->
+            <div class="er-section">
+              <h3 class="section-title ingreso">INGRESOS</h3>
+              
+              <div class="subsection">
+                <h4>Ingresos Operacionales</h4>
+                @for (cuenta of estadoResultados()!.ingresos.operacionales; track cuenta.codigo) {
+                  <div class="cuenta-balance">
+                    <span class="cuenta-nombre">{{ cuenta.codigo }} - {{ cuenta.nombre }}</span>
+                    <span class="cuenta-saldo">{{ formatoMoneda(cuenta.saldo) }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="total-section">
+                <strong>TOTAL INGRESOS</strong>
+                <strong>{{ formatoMoneda(estadoResultados()!.ingresos.total) }}</strong>
+              </div>
+            </div>
+
+            <!-- Gastos -->
+            <div class="er-section">
+              <h3 class="section-title gasto">GASTOS</h3>
+              
+              <div class="subsection">
+                <h4>Gastos Operacionales</h4>
+                @for (cuenta of estadoResultados()!.gastos.operacionales; track cuenta.codigo) {
+                  <div class="cuenta-balance">
+                    <span class="cuenta-nombre">{{ cuenta.codigo }} - {{ cuenta.nombre }}</span>
+                    <span class="cuenta-saldo">{{ formatoMoneda(cuenta.saldo) }}</span>
+                  </div>
+                }
+              </div>
+
+              <div class="total-section">
+                <strong>TOTAL GASTOS</strong>
+                <strong>{{ formatoMoneda(estadoResultados()!.gastos.total) }}</strong>
+              </div>
+            </div>
+
+            <!-- Utilidades -->
+            <div class="utilidades">
+              <div class="utilidad-item bruta">
+                <strong>UTILIDAD BRUTA</strong>
+                <strong>{{ formatoMoneda(estadoResultados()!.utilidad_bruta) }}</strong>
+              </div>
+              <div class="utilidad-item operativa">
+                <strong>UTILIDAD OPERATIVA</strong>
+                <strong>{{ formatoMoneda(estadoResultados()!.utilidad_operativa) }}</strong>
+              </div>
+              <div class="utilidad-item neta">
+                <strong>UTILIDAD NETA</strong>
+                <strong>{{ formatoMoneda(estadoResultados()!.utilidad_neta) }}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </main>
+  </div>
+</div>
